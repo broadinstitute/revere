@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/spf13/viper"
-
+	"github.com/broadinstitute/terra-status-manager/internal"
+	"github.com/broadinstitute/terra-status-manager/internal/shared"
+	"github.com/broadinstitute/terra-status-manager/pkg"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // prepareCmd represents the prepare command
@@ -18,10 +19,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("prepare called")
-		if viper.GetBool("verbose") {
-			fmt.Println(viper.GetString("statuspage.apiKey"))
-		}
+		config, err := pkg.AssembleConfig(viper.GetViper())
+		cobra.CheckErr(err)
+		client := shared.StatuspageClient(config)
+		err = internal.InstantiateComponents(config, client)
+		cobra.CheckErr(err)
 	},
 }
 
