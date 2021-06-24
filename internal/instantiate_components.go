@@ -72,9 +72,8 @@ func InstantiateComponents(config *pkg.Config, client *resty.Client) error {
 		return err
 	}
 
-	remoteComponentList := response.Result().(*[]shared.StatuspageResponseComponent)
 	remoteComponentMap := make(map[string]shared.StatuspageResponseComponent)
-	for _, remoteComponent := range *remoteComponentList {
+	for _, remoteComponent := range *response.Result().(*[]shared.StatuspageResponseComponent) {
 		remoteComponentMap[remoteComponent.Name] = remoteComponent
 	}
 
