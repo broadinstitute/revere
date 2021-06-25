@@ -12,20 +12,20 @@ import (
 // This is an exact superset of what Statuspage accepts as input for components,
 // which is in turn an exact superset of pkg.Component.
 type Component struct {
-	AutomationEmail    string `json:"automation_email,omitempty"`
-	CreatedAt          string `json:"created_at,omitempty"`
-	Description        string `json:"description,omitempty"`
+	AutomationEmail    string `json:"automation_email"`
+	CreatedAt          string `json:"created_at"`
+	Description        string `json:"description"`
 	Group              bool   `json:"group"`
-	GroupID            string `json:"group_id,omitempty"`
-	ID                 string `json:"id,omitempty"`
-	Name               string `json:"name,omitempty"`
+	GroupID            string `json:"group_id"`
+	ID                 string `json:"id"`
+	Name               string `json:"name"`
 	OnlyShowIfDegraded bool   `json:"only_show_if_degraded"`
-	PageID             string `json:"page_id,omitempty"`
+	PageID             string `json:"page_id"`
 	Position           int    `json:"position"`
-	Showcase           bool   `json:"showcase,omitempty"`
-	StartDate          string `json:"start_date,omitempty"`
-	Status             string `json:"status,omitempty"`
-	UpdatedAt          string `json:"updated_at,omitempty"`
+	Showcase           bool   `json:"showcase"`
+	StartDate          string `json:"start_date"`
+	Status             string `json:"status"`
+	UpdatedAt          string `json:"updated_at"`
 }
 
 func ComponentConfigToApi(configComponent pkg.Component, apiComponent *Component) error {
