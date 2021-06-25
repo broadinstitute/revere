@@ -15,7 +15,9 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "terra-status-manager",
 	Short: "Interact with Terra's production Statuspage",
-	Long: `Requires a configuration file via --config, ./terra-status-manager.yaml,
+	Long: `Interact with Terra's production Statuspage.
+
+Requires a configuration file via --config, ./terra-status-manager.yaml,
 or /etc/terra-status-manager/terra-status-manager.yaml.
 
 To configure Statuspage.io based on the config file:
