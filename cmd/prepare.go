@@ -22,7 +22,7 @@ diff would identify no changes.`,
 func Prepare(*cobra.Command, []string) {
 	config, err := pkg.AssembleConfig(viper.GetViper())
 	cobra.CheckErr(err)
-	client := statuspage.StatuspageClient(config)
+	client := statuspage.Client(config)
 	err = internal.ReconcileComponents(config, client)
 	cobra.CheckErr(err)
 }

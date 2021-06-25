@@ -6,7 +6,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-func StatuspageClient(config *pkg.Config) *resty.Client {
+func Client(config *pkg.Config) *resty.Client {
 	return shared.BaseClient(config).
 		SetHostURL(config.Statuspage.ApiRoot).
 		SetAuthScheme("OAuth").
