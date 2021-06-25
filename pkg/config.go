@@ -33,7 +33,6 @@ type Config struct {
 	Client struct {
 		// Number of 300-series redirects to follow
 		Redirects int // default: 3
-
 		// Number of exponential-backoff retries to make
 		Retries int // default: 3
 	}
@@ -42,24 +41,24 @@ type Config struct {
 		// API key to communicate with Statuspage.io
 		// NOTE: Required but sensitive, should be set via TSM_STATUSPAGE_APIKEY=...
 		ApiKey string `validate:"nonzero"`
-
 		// ID of the particular page to interact with
-		PageID string `validate:"nonzero"`
-
-		ApiRoot string // default: "https://api.statuspage.io/v1"
-
-		Components []StatuspageComponent
+		PageID     string `validate:"nonzero"`
+		ApiRoot    string // default: "https://api.statuspage.io/v1"
+		Components []Component
 	}
 }
 
-type StatuspageComponent struct {
+// Component configuration--note that leaving any of the below unfilled will use Go's "zero" value (false/empty)
+type Component struct {
 	// Unique but user-readable component name
-	Name               string `validate:"nonzero"`
-	Description        string
-	GroupID            string
+	Name        string `validate:"nonzero"`
+	Description string
+	// If the component should be hidden to users while operational
 	OnlyShowIfDegraded bool
-	Showcase           bool
-	StartDate          string
+	// If uptime data should be hidden and go unrecorded
+	HideUptime bool
+	// Date the component existed from, in the form YYYY-MM-DD
+	StartDate string `validate:"nonzero"`
 }
 
 func newDefaultConfig() *Config {

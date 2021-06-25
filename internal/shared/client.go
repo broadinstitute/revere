@@ -6,7 +6,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-func baseClient(config *pkg.Config) *resty.Client {
+func BaseClient(config *pkg.Config) *resty.Client {
 	return resty.New().
 		SetRedirectPolicy(resty.FlexibleRedirectPolicy(config.Client.Redirects)).
 		SetRetryCount(config.Client.Retries)
