@@ -11,67 +11,70 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// componentsToDelete provides a slice of remote components that don't correlate to an entry in the configuration
-func componentsToDelete(
+// listComponentsToDelete provides a slice of remote components that don't correlate to an entry in the configuration
+func listComponentsToDelete(
 	configComponentMap map[string]configuration.Component,
 	remoteComponentMap map[string]statuspage.Component,
 ) []statuspage.Component {
-	var ret []statuspage.Component
+	var componentsToDelete []statuspage.Component
 	for name, remoteComponent := range remoteComponentMap {
 		if _, found := configComponentMap[name]; !found {
-			ret = append(ret, remoteComponent)
+			componentsToDelete = append(componentsToDelete, remoteComponent)
 		}
 	}
-	return ret
+	return componentsToDelete
 }
 
-// componentsToCreate provides a slice of components that aren't present on the remote
-func componentsToCreate(
+// listComponentsToCreate provides a slice of components that aren't present on the remote
+func listComponentsToCreate(
 	configComponentMap map[string]configuration.Component,
 	remoteComponentMap map[string]statuspage.Component,
 ) ([]statuspage.Component, error) {
-	var ret []statuspage.Component
+	var componentsToCreate []statuspage.Component
 	for name, configComponent := range configComponentMap {
 		if _, found := remoteComponentMap[name]; !found {
-			var c statuspage.Component
-			err := statuspage.ComponentConfigToApi(configComponent, &c)
+			var newComponent statuspage.Component
+			err := statuspage.ComponentConfigToApi(configComponent, &newComponent)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding pkg.Component to statuspage.Component: %w", err)
 			}
 			// We specifically don't want status to be influenced by configuration file; components start out operational
-			c.Status = "operational"
-			ret = append(ret, c)
+			newComponent.Status = "operational"
+			componentsToCreate = append(componentsToCreate, newComponent)
 		}
 	}
-	return ret, nil
+	return componentsToCreate, nil
 }
 
-// componentsToModify provides a slice of components that should be modified on the remote
-func componentsToModify(
+// listComponentsToModify provides a slice of components that should be modified on the remote
+func listComponentsToModify(
 	configComponentMap map[string]configuration.Component,
 	remoteComponentMap map[string]statuspage.Component,
 ) ([]statuspage.Component, error) {
-	var ret []statuspage.Component
+	var componentsToModify []statuspage.Component
 	for name, configComponent := range configComponentMap {
 		if remoteComponent, found := remoteComponentMap[name]; found {
-			var c statuspage.Component
-			err := mapstructure.Decode(remoteComponent, &c)
+			var modifiedComponent statuspage.Component
+			err := mapstructure.Decode(remoteComponent, &modifiedComponent)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding statuspage.Component to statuspage.Component: %w", err)
 			}
-			err = statuspage.ComponentConfigToApi(configComponent, &c)
+			err = statuspage.ComponentConfigToApi(configComponent, &modifiedComponent)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding pkg.Component to statuspage.Component: %w", err)
 			}
 			// if remote component is different from remote+configuration component, it must be modified
-			if !reflect.DeepEqual(remoteComponent, c) {
-				ret = append(ret, c)
+			if !reflect.DeepEqual(remoteComponent, modifiedComponent) {
+				componentsToModify = append(componentsToModify, modifiedComponent)
 			}
 		}
 	}
-	return ret, nil
+	return componentsToModify, nil
 }
 
+// ReconcileComponents modifies the set of components on Statuspage.io to match what is given in the config file.
+// It creates statuspage.Component slices for deletion, creation, and modification, and then hands that data
+// to the correct functions in statuspage/api.go
 func ReconcileComponents(config *configuration.Config, client *resty.Client) error {
 	statuspageComponents, err := statuspage.GetComponents(client, config.Statuspage.PageID)
 	if err != nil {
@@ -86,38 +89,38 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 		configComponentMap[configComponent.Name] = configComponent
 	}
 
-	toDelete := componentsToDelete(configComponentMap, statuspageComponentMap)
-	toCreate, err := componentsToCreate(configComponentMap, statuspageComponentMap)
+	toDelete := listComponentsToDelete(configComponentMap, statuspageComponentMap)
+	toCreate, err := listComponentsToCreate(configComponentMap, statuspageComponentMap)
 	if err != nil {
 		return err
 	}
-	toModify, err := componentsToModify(configComponentMap, statuspageComponentMap)
+	toModify, err := listComponentsToModify(configComponentMap, statuspageComponentMap)
 	if err != nil {
 		return err
 	}
 
-	for _, c := range toDelete {
-		shared.LogLn(config, fmt.Sprintf("deleting %s component from statuspage", c.Name),
-			fmt.Sprintf("Deleting: %+v", c))
-		err := statuspage.DeleteComponent(client, config.Statuspage.PageID, c.ID)
+	for _, component := range toDelete {
+		shared.LogLn(config, fmt.Sprintf("deleting %s component from statuspage", component.Name),
+			fmt.Sprintf("Deleting: %+v", component))
+		err := statuspage.DeleteComponent(client, config.Statuspage.PageID, component.ID)
 		if err != nil {
 			return err
 		}
 	}
-	for _, c := range toCreate {
-		shared.LogLn(config, fmt.Sprintf("creating %s component on statuspage", c.Name),
-			fmt.Sprintf("New: %+v", c))
-		_, err := statuspage.PostComponent(client, config.Statuspage.PageID, c)
+	for _, component := range toCreate {
+		shared.LogLn(config, fmt.Sprintf("creating %s component on statuspage", component.Name),
+			fmt.Sprintf("New: %+v", component))
+		_, err := statuspage.PostComponent(client, config.Statuspage.PageID, component)
 		if err != nil {
 			return err
 		}
 	}
-	for _, c := range toModify {
-		shared.LogLn(config, fmt.Sprintf("modifying %s component on statuspage", c.Name),
-			fmt.Sprintf("Config: %+v", configComponentMap[c.Name]),
-			fmt.Sprintf("Original: %+v", statuspageComponentMap[c.Name]),
-			fmt.Sprintf("New: %+v", c))
-		_, err := statuspage.PatchComponent(client, config.Statuspage.PageID, c.ID, c)
+	for _, component := range toModify {
+		shared.LogLn(config, fmt.Sprintf("modifying %s component on statuspage", component.Name),
+			fmt.Sprintf("Config: %+v", configComponentMap[component.Name]),
+			fmt.Sprintf("Original: %+v", statuspageComponentMap[component.Name]),
+			fmt.Sprintf("New: %+v", component))
+		_, err := statuspage.PatchComponent(client, config.Statuspage.PageID, component.ID, component)
 		if err != nil {
 			return err
 		}

@@ -5,14 +5,14 @@ import (
 )
 
 // LogLn prints each non-empty string if configuration.Verbose, only the first string otherwise.
-func LogLn(config *configuration.Config, always string, verbose ...string) {
-	if always != "" {
-		println(always)
+func LogLn(config *configuration.Config, alwaysPrint string, verbosePrint ...string) {
+	if alwaysPrint != "" {
+		println(alwaysPrint)
 	}
 	if config.Verbose {
-		for _, s := range verbose {
-			if s != "" {
-				println(s)
+		for _, str := range verbosePrint {
+			if str != "" {
+				println(str)
 			}
 		}
 	}

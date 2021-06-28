@@ -61,11 +61,11 @@ type Component struct {
 }
 
 func newDefaultConfig() *Config {
-	var c Config
-	c.Client.Redirects = 3
-	c.Client.Retries = 3
-	c.Statuspage.ApiRoot = "https://api.statuspage.io/v1"
-	return &c
+	var config Config
+	config.Client.Redirects = 3
+	config.Client.Retries = 3
+	config.Statuspage.ApiRoot = "https://api.statuspage.io/v1"
+	return &config
 }
 
 func readEnvironmentVariables(config *Config) {
@@ -76,15 +76,15 @@ func readEnvironmentVariables(config *Config) {
 }
 
 func AssembleConfig(v *viper.Viper) (*Config, error) {
-	c := newDefaultConfig()
-	readEnvironmentVariables(c)
-	err := v.Unmarshal(c)
+	config := newDefaultConfig()
+	readEnvironmentVariables(config)
+	err := v.Unmarshal(config)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling Viper to configuration struct: %w", err)
 	}
-	err = validator.Validate(c)
+	err = validator.Validate(config)
 	if err != nil {
 		return nil, fmt.Errorf("errors validating configuration: %w", err)
 	}
-	return c, nil
+	return config, nil
 }
