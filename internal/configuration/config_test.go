@@ -36,8 +36,8 @@ func TestAssembleConfig(t *testing.T) {
 					Retries:   3,
 				},
 				Statuspage: struct {
-					ApiKey     string `validate:"nonzero"`
-					PageID     string `validate:"nonzero"`
+					ApiKey     string `validate:"required"`
+					PageID     string `validate:"required"`
 					ApiRoot    string
 					Components []Component
 				}{
@@ -81,8 +81,8 @@ func Test_newDefaultConfig(t *testing.T) {
 					Retries:   3,
 				},
 				Statuspage: struct {
-					ApiKey     string `validate:"nonzero"`
-					PageID     string `validate:"nonzero"`
+					ApiKey     string `validate:"required"`
+					PageID     string `validate:"required"`
 					ApiRoot    string
 					Components []Component
 				}{

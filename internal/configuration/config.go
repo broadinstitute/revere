@@ -2,10 +2,10 @@ package configuration
 
 import (
 	"fmt"
+	"gopkg.in/go-playground/validator.v9"
 	"os"
 
 	"github.com/spf13/viper"
-	"gopkg.in/validator.v2"
 )
 
 /*
@@ -39,9 +39,9 @@ type Config struct {
 	Statuspage struct {
 		// API key to communicate with Statuspage.io
 		// NOTE: May be set via REVERE_STATUSPAGE_APIKEY in environment
-		ApiKey string `validate:"nonzero"`
+		ApiKey string `validate:"required"`
 		// ID of the particular page to interact with
-		PageID     string `validate:"nonzero"`
+		PageID     string `validate:"required"`
 		ApiRoot    string // default: "https://api.statuspage.io/v1"
 		Components []Component
 	}
@@ -50,14 +50,14 @@ type Config struct {
 // Component configuration--note that leaving any of the below unfilled will use Go's "zero" value (false/empty)
 type Component struct {
 	// Unique but user-readable component name
-	Name        string `validate:"nonzero"`
+	Name        string `validate:"required"`
 	Description string
 	// If the component should be hidden to users while operational
 	OnlyShowIfDegraded bool
 	// If uptime data should be hidden and go unrecorded
 	HideUptime bool
 	// Date the component existed from, in the form YYYY-MM-DD
-	StartDate string `validate:"nonzero"`
+	StartDate string `validate:"required"`
 }
 
 // newDefaultConfig sets config defaults only as described above
@@ -86,7 +86,8 @@ func AssembleConfig(v *viper.Viper) (*Config, error) {
 		return nil, fmt.Errorf("error unmarshalling Viper to configuration struct: %w", err)
 	}
 	readEnvironmentVariables(config)
-	err = validator.Validate(config)
+	validate := validator.New()
+	err = validate.Struct(config)
 	if err != nil {
 		return nil, fmt.Errorf("errors validating configuration: %w", err)
 	}
