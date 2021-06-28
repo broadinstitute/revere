@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 	"gopkg.in/validator.v2"
@@ -16,13 +17,10 @@ All values:
   client:
     redirects: 2
   ```
-- may be overridden via environment variables:
-  ```bash
-  REVERE_CLIENT_REDIRECTS=2
-  ```
 
 Some values:
 - may be overridden via command line flags, noted below.
+- may be overridden via environment variables, noted below and set in readEnvironmentVariables().
 - may have non-"zero" default values, noted below and set in newDefaultConfig().
 - may be required to be non-"zero", noted below and validated in AssembleConfig().
 */
@@ -40,7 +38,7 @@ type Config struct {
 
 	Statuspage struct {
 		// API key to communicate with Statuspage.io
-		// NOTE: Required but sensitive, should be set via REVERE_STATUSPAGE_APIKEY=...
+		// NOTE: May be set via REVERE_STATUSPAGE_APIKEY in environment
 		ApiKey string `validate:"nonzero"`
 		// ID of the particular page to interact with
 		PageID     string `validate:"nonzero"`
@@ -70,8 +68,16 @@ func newDefaultConfig() *Config {
 	return &c
 }
 
+func readEnvironmentVariables(config *Config) {
+	apiKey, present := os.LookupEnv("REVERE_STATUSPAGE_APIKEY")
+	if present {
+		config.Statuspage.ApiKey = apiKey
+	}
+}
+
 func AssembleConfig(v *viper.Viper) (*Config, error) {
 	c := newDefaultConfig()
+	readEnvironmentVariables(c)
 	err := v.Unmarshal(c)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling Viper to config struct: %w", err)

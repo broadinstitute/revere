@@ -2,11 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/spf13/cobra"
-
 	"github.com/spf13/viper"
 )
 
@@ -49,23 +45,15 @@ func initConfig() {
 		viper.SetConfigName("revere")
 	}
 
-	// example: statuspage.apiKey overridden by env var REVERE_STATUSPAGE_APIKEY
-	viper.SetEnvPrefix("REVERE")
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv()
-
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			_, err := fmt.Fprintln(os.Stderr, "Not using a configuration file!")
-			// err here is Fprintln's, so probably nil--we intentionally don't always exit
-			// here since Viper can be configured other ways and we validate config later
-			cobra.CheckErr(err)
+			cobra.CheckErr(fmt.Errorf("not using a configuration file! %w", err))
 		} else {
 			cobra.CheckErr(err)
 		}
 	} else {
-		_, err := fmt.Println("Using configuration file:", viper.ConfigFileUsed())
+		_, err := fmt.Println("using configuration file:", viper.ConfigFileUsed())
 		cobra.CheckErr(err)
 	}
 }
