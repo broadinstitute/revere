@@ -51,6 +51,8 @@ type requestComponent struct {
 	Status             string `json:"status,omitempty"`
 }
 
+// toRequest converts Component to requestComponent in a type-safe way to avoid
+// needing to handle mapstructure.decode(...) errors
 func (c *Component) toRequest() requestComponent {
 	return requestComponent{
 		Description:        c.Description,
@@ -63,6 +65,7 @@ func (c *Component) toRequest() requestComponent {
 	}
 }
 
+// GetComponents provides a slice of all components on the remote page
 func GetComponents(client *resty.Client, pageID string) (*[]Component, error) {
 	resp, err := client.R().
 		SetResult([]Component{}).
@@ -73,6 +76,7 @@ func GetComponents(client *resty.Client, pageID string) (*[]Component, error) {
 	return resp.Result().(*[]Component), nil
 }
 
+// PostComponent creates a new component on the remote page
 func PostComponent(client *resty.Client, pageID string, component Component) (*Component, error) {
 	resp, err := client.R().
 		SetResult(Component{}).
@@ -84,6 +88,7 @@ func PostComponent(client *resty.Client, pageID string, component Component) (*C
 	return resp.Result().(*Component), nil
 }
 
+// PatchComponent updates an existing component on the remote page by the component's ID, not name
 func PatchComponent(client *resty.Client, pageID string, componentID string, component Component) (*Component, error) {
 	resp, err := client.R().
 		SetResult(Component{}).
@@ -95,6 +100,7 @@ func PatchComponent(client *resty.Client, pageID string, componentID string, com
 	return resp.Result().(*Component), nil
 }
 
+// DeleteComponent deletes an existing component on the remote page by the component's ID, not name
 func DeleteComponent(client *resty.Client, pageID string, componentID string) error {
 	resp, err := client.R().
 		Delete(fmt.Sprintf("/pages/%s/components/%s", pageID, componentID))
