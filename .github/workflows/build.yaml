@@ -16,12 +16,14 @@ name: Bump, Tag, and Publish
 # - GCP_PUBLISH_KEY_B64 - SA key (Base64-encoded JSON string) for publishing to dsp-artifact-registry
 # - BROADBOT_TOKEN - the broadbot token, so we can avoid two reviewer rule on GHA operations
 on:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
   push:
     branches:
       - main
     paths-ignore:
       - 'README.md'
-      - '.github/**'
   workflow_dispatch:
     inputs:
       bump:
