@@ -60,6 +60,7 @@ type Component struct {
 	StartDate string `validate:"nonzero"`
 }
 
+// newDefaultConfig sets config defaults only as described above
 func newDefaultConfig() *Config {
 	var config Config
 	config.Client.Redirects = 3
@@ -68,6 +69,7 @@ func newDefaultConfig() *Config {
 	return &config
 }
 
+// readEnvironmentVariables sets config values from the environment specifically only as described above
 func readEnvironmentVariables(config *Config) {
 	apiKey, present := os.LookupEnv("REVERE_STATUSPAGE_APIKEY")
 	if present {
@@ -75,13 +77,15 @@ func readEnvironmentVariables(config *Config) {
 	}
 }
 
+// AssembleConfig creates a default config, reads values from Viper's config file,
+// reads applies overrides from the environment, and validates the config before returning
 func AssembleConfig(v *viper.Viper) (*Config, error) {
 	config := newDefaultConfig()
-	readEnvironmentVariables(config)
 	err := v.Unmarshal(config)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling Viper to configuration struct: %w", err)
 	}
+	readEnvironmentVariables(config)
 	err = validator.Validate(config)
 	if err != nil {
 		return nil, fmt.Errorf("errors validating configuration: %w", err)
