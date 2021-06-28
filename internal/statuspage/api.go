@@ -2,9 +2,9 @@ package statuspage
 
 import (
 	"fmt"
+	"github.com/broadinstitute/revere/internal/configuration"
 
 	"github.com/broadinstitute/revere/internal/shared"
-	"github.com/broadinstitute/revere/pkg"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 )
@@ -29,7 +29,7 @@ type Component struct {
 	UpdatedAt          string `json:"updated_at"`
 }
 
-func ComponentConfigToApi(configComponent pkg.Component, apiComponent *Component) error {
+func ComponentConfigToApi(configComponent configuration.Component, apiComponent *Component) error {
 	err := mapstructure.Decode(configComponent, apiComponent)
 	if err != nil {
 		return err

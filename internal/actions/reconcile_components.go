@@ -1,19 +1,19 @@
-package internal
+package actions
 
 import (
 	"fmt"
+	"github.com/broadinstitute/revere/internal/configuration"
 	"reflect"
 
 	"github.com/broadinstitute/revere/internal/shared"
 	"github.com/broadinstitute/revere/internal/statuspage"
-	"github.com/broadinstitute/revere/pkg"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 )
 
-// componentsToDelete provides a slice of remote components that don't correlate to an entry in the config
+// componentsToDelete provides a slice of remote components that don't correlate to an entry in the configuration
 func componentsToDelete(
-	configComponentMap map[string]pkg.Component,
+	configComponentMap map[string]configuration.Component,
 	remoteComponentMap map[string]statuspage.Component,
 ) []statuspage.Component {
 	var ret []statuspage.Component
@@ -27,7 +27,7 @@ func componentsToDelete(
 
 // componentsToCreate provides a slice of components that aren't present on the remote
 func componentsToCreate(
-	configComponentMap map[string]pkg.Component,
+	configComponentMap map[string]configuration.Component,
 	remoteComponentMap map[string]statuspage.Component,
 ) ([]statuspage.Component, error) {
 	var ret []statuspage.Component
@@ -38,7 +38,7 @@ func componentsToCreate(
 			if err != nil {
 				return nil, fmt.Errorf("error decoding pkg.Component to statuspage.Component: %w", err)
 			}
-			// We specifically don't want status to be influenced by config file; components start out operational
+			// We specifically don't want status to be influenced by configuration file; components start out operational
 			c.Status = "operational"
 			ret = append(ret, c)
 		}
@@ -48,7 +48,7 @@ func componentsToCreate(
 
 // componentsToModify provides a slice of components that should be modified on the remote
 func componentsToModify(
-	configComponentMap map[string]pkg.Component,
+	configComponentMap map[string]configuration.Component,
 	remoteComponentMap map[string]statuspage.Component,
 ) ([]statuspage.Component, error) {
 	var ret []statuspage.Component
@@ -63,7 +63,7 @@ func componentsToModify(
 			if err != nil {
 				return nil, fmt.Errorf("error decoding pkg.Component to statuspage.Component: %w", err)
 			}
-			// if remote component is different from remote+config component, it must be modified
+			// if remote component is different from remote+configuration component, it must be modified
 			if !reflect.DeepEqual(remoteComponent, c) {
 				ret = append(ret, c)
 			}
@@ -72,7 +72,7 @@ func componentsToModify(
 	return ret, nil
 }
 
-func ReconcileComponents(config *pkg.Config, client *resty.Client) error {
+func ReconcileComponents(config *configuration.Config, client *resty.Client) error {
 	statuspageComponents, err := statuspage.GetComponents(client, config.Statuspage.PageID)
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func ReconcileComponents(config *pkg.Config, client *resty.Client) error {
 	for _, statuspageComponent := range *statuspageComponents {
 		statuspageComponentMap[statuspageComponent.Name] = statuspageComponent
 	}
-	configComponentMap := make(map[string]pkg.Component)
+	configComponentMap := make(map[string]configuration.Component)
 	for _, configComponent := range config.Statuspage.Components {
 		configComponentMap[configComponent.Name] = configComponent
 	}

@@ -14,10 +14,10 @@ var rootCmd = &cobra.Command{
 	Short: "Interact with Terra's production Statuspage",
 	Long: `Interact with Terra's production Statuspage.
 
-Requires a configuration file via --config, ./revere.yaml,
+Requires a configuration file via --configuration, ./revere.yaml,
 or /etc/revere/revere.yaml.
 
-To configure Statuspage.io based on the config file:
+To configure Statuspage.io based on the configuration file:
 	$ revere prepare`,
 }
 
@@ -29,13 +29,13 @@ func Execute() {
 // init configures flags (both persistent across child commands and local to root)
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./revere.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "configuration", "", "configuration file (default is ./revere.yaml)")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "enable more verbose console output")
 	err := viper.BindPFlags(rootCmd.Flags())
 	cobra.CheckErr(err)
 }
 
-// initConfig reads in config file (flag or default) and ENV variables if set
+// initConfig reads in configuration file (flag or default) and ENV variables if set
 func initConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)

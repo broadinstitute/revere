@@ -2,12 +2,12 @@ package shared
 
 import (
 	"fmt"
+	"github.com/broadinstitute/revere/internal/configuration"
 
-	"github.com/broadinstitute/revere/pkg"
 	"github.com/go-resty/resty/v2"
 )
 
-func BaseClient(config *pkg.Config) *resty.Client {
+func BaseClient(config *configuration.Config) *resty.Client {
 	return resty.New().
 		SetRedirectPolicy(resty.FlexibleRedirectPolicy(config.Client.Redirects)).
 		SetRetryCount(config.Client.Retries)

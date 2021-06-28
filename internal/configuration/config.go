@@ -1,4 +1,4 @@
-package pkg
+package configuration
 
 import (
 	"fmt"
@@ -80,11 +80,11 @@ func AssembleConfig(v *viper.Viper) (*Config, error) {
 	readEnvironmentVariables(c)
 	err := v.Unmarshal(c)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling Viper to config struct: %w", err)
+		return nil, fmt.Errorf("error unmarshalling Viper to configuration struct: %w", err)
 	}
 	err = validator.Validate(c)
 	if err != nil {
-		return nil, fmt.Errorf("errors validating config: %w", err)
+		return nil, fmt.Errorf("errors validating configuration: %w", err)
 	}
 	return c, nil
 }
