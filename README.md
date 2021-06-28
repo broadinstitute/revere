@@ -1,4 +1,4 @@
-# terra-status-manager
+# revere
 
 > **WIP**
 >

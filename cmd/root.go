@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 
 	"github.com/spf13/viper"
 )
@@ -13,15 +14,15 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "terra-status-manager",
+	Use:   "revere",
 	Short: "Interact with Terra's production Statuspage",
 	Long: `Interact with Terra's production Statuspage.
 
-Requires a configuration file via --config, ./terra-status-manager.yaml,
-or /etc/terra-status-manager/terra-status-manager.yaml.
+Requires a configuration file via --config, ./revere.yaml,
+or /etc/revere/revere.yaml.
 
 To configure Statuspage.io based on the config file:
-	$ terra-status-manager prepare`,
+	$ revere prepare`,
 }
 
 // Execute adds all child commands to the root command, only necessary for rootCmd
@@ -32,7 +33,7 @@ func Execute() {
 // init configures flags (both persistent across child commands and local to root)
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./terra-status-manager.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./revere.yaml)")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "enable more verbose console output")
 	err := viper.BindPFlags(rootCmd.Flags())
 	cobra.CheckErr(err)
@@ -44,12 +45,12 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		viper.AddConfigPath(".")
-		viper.AddConfigPath("/etc/terra-status-manager/")
-		viper.SetConfigName("terra-status-manager")
+		viper.AddConfigPath("/etc/revere/")
+		viper.SetConfigName("revere")
 	}
 
-	// example: statuspage.apiKey overridden by env var TSM_STATUSPAGE_APIKEY
-	viper.SetEnvPrefix("TSM")
+	// example: statuspage.apiKey overridden by env var REVERE_STATUSPAGE_APIKEY
+	viper.SetEnvPrefix("REVERE")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 

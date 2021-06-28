@@ -2,7 +2,8 @@ package shared
 
 import (
 	"fmt"
-	"github.com/broadinstitute/terra-status-manager/pkg"
+
+	"github.com/broadinstitute/revere/pkg"
 	"github.com/go-resty/resty/v2"
 )
 

@@ -2,8 +2,9 @@ package statuspage
 
 import (
 	"fmt"
-	"github.com/broadinstitute/terra-status-manager/internal/shared"
-	"github.com/broadinstitute/terra-status-manager/pkg"
+
+	"github.com/broadinstitute/revere/internal/shared"
+	"github.com/broadinstitute/revere/pkg"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 )

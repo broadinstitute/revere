@@ -1,6 +1,6 @@
 package shared
 
-import "github.com/broadinstitute/terra-status-manager/pkg"
+import "github.com/broadinstitute/revere/pkg"
 
 // LogLn prints each non-empty string if config.Verbose, only the first string otherwise.
 func LogLn(config *pkg.Config, always string, verbose ...string) {

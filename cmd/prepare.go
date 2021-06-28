@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/broadinstitute/terra-status-manager/internal"
-	"github.com/broadinstitute/terra-status-manager/internal/statuspage"
-	"github.com/broadinstitute/terra-status-manager/pkg"
+	"github.com/broadinstitute/revere/internal"
+	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/pkg"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

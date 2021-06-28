@@ -1,4 +1,4 @@
-module github.com/broadinstitute/terra-status-manager
+module github.com/broadinstitute/revere
 
 go 1.16
 

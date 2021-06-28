@@ -2,12 +2,13 @@ package internal
 
 import (
 	"fmt"
-	"github.com/broadinstitute/terra-status-manager/internal/shared"
-	"github.com/broadinstitute/terra-status-manager/internal/statuspage"
-	"github.com/broadinstitute/terra-status-manager/pkg"
+	"reflect"
+
+	"github.com/broadinstitute/revere/internal/shared"
+	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/pkg"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
-	"reflect"
 )
 
 // componentsToDelete provides a slice of remote components that don't correlate to an entry in the config

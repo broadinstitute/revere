@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+
 	"github.com/spf13/viper"
 	"gopkg.in/validator.v2"
 )
@@ -10,14 +11,14 @@ import (
 Config schema
 
 All values:
-- may be set in terra-status-manager.yaml, see cmd/root.go:
+- may be set in revere.yaml, see cmd/root.go:
   ```yaml
   client:
     redirects: 2
   ```
 - may be overridden via environment variables:
   ```bash
-  TSM_CLIENT_REDIRECTS=2
+  REVERE_CLIENT_REDIRECTS=2
   ```
 
 Some values:
@@ -39,7 +40,7 @@ type Config struct {
 
 	Statuspage struct {
 		// API key to communicate with Statuspage.io
-		// NOTE: Required but sensitive, should be set via TSM_STATUSPAGE_APIKEY=...
+		// NOTE: Required but sensitive, should be set via REVERE_STATUSPAGE_APIKEY=...
 		ApiKey string `validate:"nonzero"`
 		// ID of the particular page to interact with
 		PageID     string `validate:"nonzero"`
