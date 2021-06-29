@@ -35,7 +35,7 @@ func TestStableSort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sort.Sort(StableSort(tt.given))
+			sort.Sort(ComponentSort(tt.given))
 			if !reflect.DeepEqual(tt.given, tt.want) {
 				t.Errorf("Sorted = %v, want %v", tt.given, tt.want)
 			}
