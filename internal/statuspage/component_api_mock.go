@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
 	"github.com/jarcoal/httpmock"
-	"github.com/mitchellh/mapstructure"
 	"math/rand"
 	"net/http"
+	"strconv"
 )
 
 //goland:noinspection SpellCheckingInspection
@@ -63,12 +63,15 @@ func validateComponentID(components map[string]Component, request *http.Request)
 
 // ConfigureComponentMock mimics the behavior of Statuspage's component API via the given backing map.
 // Any components given in the initial map or created via the mock will have their page ID properly set.
+// Created component IDs are incremented based on component map size and the number of deleted components.
 // The caller is responsible for activating/deactivating/resetting httpmock.
 func ConfigureComponentMock(config *configuration.Config, components map[string]Component) {
+	deletedComponentCount := 0
 	pageID := config.Statuspage.PageID
 	apiRoot := config.Statuspage.ApiRoot
-	for _, component := range components {
+	for key, component := range components {
 		component.PageID = pageID
+		components[key] = component
 	}
 	httpmock.RegisterResponder("GET", fmt.Sprintf(`=~^%s/pages/(\w+)/components`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
@@ -95,7 +98,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 				return httpmock.NewStringResponse(400, err.Error()), nil
 			}
 			component := incomingBody.Component
-			component.ID = randStringRunes(8)
+			component.ID = strconv.Itoa(len(components) + deletedComponentCount + 1)
 			component.PageID = pageID
 			components[component.ID] = component
 			resp, err := httpmock.NewJsonResponse(201, component)
@@ -117,10 +120,16 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 				return httpmock.NewStringResponse(400, err.Error()), nil
 			}
 			existingComponent := components[httpmock.MustGetSubmatch(request, 2)]
-			if err := mapstructure.Decode(incomingBody.Component, &existingComponent); err != nil {
-				return httpmock.NewStringResponse(500, err.Error()), nil
+			// mimic Statuspage's more flexible json behavior as best we can
+			existingComponent.Description = incomingBody.Component.Description
+			existingComponent.Name = incomingBody.Component.Name
+			existingComponent.OnlyShowIfDegraded = incomingBody.Component.OnlyShowIfDegraded
+			existingComponent.Showcase = incomingBody.Component.Showcase
+			existingComponent.StartDate = incomingBody.Component.StartDate
+			if incomingBody.Component.Status != "" {
+				existingComponent.Status = incomingBody.Component.Status
 			}
-			existingComponent.ID = httpmock.MustGetSubmatch(request, 2)
+			components[httpmock.MustGetSubmatch(request, 2)] = existingComponent
 			resp, err := httpmock.NewJsonResponse(200, &existingComponent)
 			if err != nil {
 				return httpmock.NewStringResponse(500, err.Error()), nil
@@ -136,6 +145,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 				return componentNotFound, nil
 			}
 			delete(components, httpmock.MustGetSubmatch(request, 2))
+			deletedComponentCount += 1
 			return httpmock.NewStringResponse(204, "deleted"), nil
 		})
 }

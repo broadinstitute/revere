@@ -6,7 +6,6 @@ import (
 
 	"github.com/broadinstitute/revere/internal/shared"
 	"github.com/go-resty/resty/v2"
-	"github.com/mitchellh/mapstructure"
 )
 
 // Component represents how Statuspage returns components in its API.
@@ -29,13 +28,12 @@ type Component struct {
 	UpdatedAt          string `json:"updated_at"`
 }
 
-func ComponentConfigToApi(configComponent configuration.Component, apiComponent *Component) error {
-	err := mapstructure.Decode(configComponent, apiComponent)
-	if err != nil {
-		return err
-	}
+func ComponentConfigToApi(configComponent configuration.Component, apiComponent *Component) {
+	apiComponent.Name = configComponent.Name
+	apiComponent.Description = configComponent.Description
+	apiComponent.OnlyShowIfDegraded = configComponent.OnlyShowIfDegraded
+	apiComponent.StartDate = configComponent.StartDate
 	apiComponent.Showcase = !configComponent.HideUptime
-	return nil
 }
 
 // requestComponent represents what Statuspage accepts as input for components.

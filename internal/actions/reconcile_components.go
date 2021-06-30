@@ -34,10 +34,7 @@ func listComponentsToCreate(
 	for name, configComponent := range configComponentMap {
 		if _, found := remoteComponentMap[name]; !found {
 			var newComponent statuspage.Component
-			err := statuspage.ComponentConfigToApi(configComponent, &newComponent)
-			if err != nil {
-				return nil, fmt.Errorf("error decoding pkg.Component to statuspage.Component: %w", err)
-			}
+			statuspage.ComponentConfigToApi(configComponent, &newComponent)
 			// We specifically don't want status to be influenced by configuration file; components start out operational
 			newComponent.Status = "operational"
 			componentsToCreate = append(componentsToCreate, newComponent)
@@ -59,10 +56,7 @@ func listComponentsToModify(
 			if err != nil {
 				return nil, fmt.Errorf("error decoding statuspage.Component to statuspage.Component: %w", err)
 			}
-			err = statuspage.ComponentConfigToApi(configComponent, &modifiedComponent)
-			if err != nil {
-				return nil, fmt.Errorf("error decoding pkg.Component to statuspage.Component: %w", err)
-			}
+			statuspage.ComponentConfigToApi(configComponent, &modifiedComponent)
 			// if remote component is different from remote+configuration component, it must be modified
 			if !reflect.DeepEqual(remoteComponent, modifiedComponent) {
 				componentsToModify = append(componentsToModify, modifiedComponent)

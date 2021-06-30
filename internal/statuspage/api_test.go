@@ -14,10 +14,9 @@ func TestComponentConfigToApi(t *testing.T) {
 		apiComponent    *Component
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-		want    *Component
+		name string
+		args args
+		want *Component
 	}{
 		{
 			name: "Inverts showcase field",
@@ -54,15 +53,7 @@ func TestComponentConfigToApi(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := ComponentConfigToApi(tt.args.configComponent, tt.args.apiComponent); (err != nil) != tt.wantErr {
-				t.Errorf("ComponentConfigToApi() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			err := ComponentConfigToApi(tt.args.configComponent, tt.args.apiComponent)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ComponentConfigToApi() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			ComponentConfigToApi(tt.args.configComponent, tt.args.apiComponent)
 			if !reflect.DeepEqual(tt.args.apiComponent, tt.want) {
 				t.Errorf("GetComponents() mutated = %v, want %v", tt.args.apiComponent, tt.want)
 			}
@@ -212,6 +203,7 @@ func TestGetComponents(t *testing.T) {
 	}
 	config := testConfig()
 	component := componentFactory("to be returned")
+	component.PageID = config.Statuspage.PageID
 	tests := []struct {
 		name    string
 		args    args
@@ -261,8 +253,10 @@ func TestPatchComponent(t *testing.T) {
 	}
 	config := testConfig()
 	baseComponent := componentFactory("to be edited")
+	baseComponent.PageID = config.Statuspage.PageID
 	modifiedComponent := componentFactory("edited component")
 	modifiedComponent.ID = baseComponent.ID
+	modifiedComponent.PageID = config.Statuspage.PageID
 	tests := []struct {
 		name    string
 		args    args
