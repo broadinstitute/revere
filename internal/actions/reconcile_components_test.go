@@ -3,6 +3,8 @@ package actions
 import (
 	"github.com/broadinstitute/revere/internal/configuration"
 	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
 	"reflect"
@@ -39,8 +41,8 @@ func TestReconcileComponents(t *testing.T) {
 		name string
 		args args
 		// ID-component maps to use for the mock
-		start   map[string]statuspage.Component
-		end     map[string]statuspage.Component
+		start   map[string]statuspagetypes.Component
+		end     map[string]statuspagetypes.Component
 		wantErr bool
 	}{
 		{
@@ -49,12 +51,12 @@ func TestReconcileComponents(t *testing.T) {
 				config: &config,
 				client: client,
 			},
-			start: map[string]statuspage.Component{
+			start: map[string]statuspagetypes.Component{
 				"1": {Name: "Same", Description: "Same description", Showcase: true, Status: "operational", ID: "1", PageID: "foo"},
 				"2": {Name: "Modified", Description: "Old description", Showcase: true, Status: "operational", ID: "2", PageID: "foo"},
 				"3": {Name: "Deleted", Description: "To be deleted", Showcase: true, Status: "operational", ID: "3", PageID: "foo"},
 			},
-			end: map[string]statuspage.Component{
+			end: map[string]statuspagetypes.Component{
 				"1": {Name: "Same", Description: "Same description", Showcase: true, Status: "operational", ID: "1", PageID: "foo"},
 				"2": {Name: "Modified", Description: "New description", Showcase: true, Status: "operational", ID: "2", PageID: "foo"},
 				"4": {Name: "New", Description: "A new component", Showcase: true, Status: "operational", ID: "4", PageID: "foo"},
@@ -64,7 +66,7 @@ func TestReconcileComponents(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.ActivateNonDefault(tt.args.client.GetClient())
-			statuspage.ConfigureComponentMock(&config, tt.start)
+			statuspagemocks.ConfigureComponentMock(&config, tt.start)
 			err := ReconcileComponents(tt.args.config, tt.args.client)
 			httpmock.DeactivateAndReset()
 			if (err != nil) != tt.wantErr {
@@ -81,12 +83,12 @@ func TestReconcileComponents(t *testing.T) {
 func Test_listComponentsToCreate(t *testing.T) {
 	type args struct {
 		configComponentMap map[string]configuration.Component
-		remoteComponentMap map[string]statuspage.Component
+		remoteComponentMap map[string]statuspagetypes.Component
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    []statuspage.Component
+		want    []statuspagetypes.Component
 		wantErr bool
 	}{
 		{
@@ -95,9 +97,9 @@ func Test_listComponentsToCreate(t *testing.T) {
 				configComponentMap: map[string]configuration.Component{
 					"new": {Name: "new"},
 				},
-				remoteComponentMap: map[string]statuspage.Component{},
+				remoteComponentMap: map[string]statuspagetypes.Component{},
 			},
-			want: []statuspage.Component{{Name: "new", Showcase: true, Status: "operational"}},
+			want: []statuspagetypes.Component{{Name: "new", Showcase: true, Status: "operational"}},
 		},
 		{
 			name: "Ignore components not slated for creation",
@@ -106,12 +108,12 @@ func Test_listComponentsToCreate(t *testing.T) {
 					"name": {Name: "name", Description: "foo"},
 					"new":  {Name: "new"},
 				},
-				remoteComponentMap: map[string]statuspage.Component{
+				remoteComponentMap: map[string]statuspagetypes.Component{
 					"name": {Name: "name", Description: "baz"},
 					"old":  {Name: "old"},
 				},
 			},
-			want: []statuspage.Component{{Name: "new", Showcase: true, Status: "operational"}},
+			want: []statuspagetypes.Component{{Name: "new", Showcase: true, Status: "operational"}},
 		},
 	}
 	for _, tt := range tests {
@@ -121,8 +123,8 @@ func Test_listComponentsToCreate(t *testing.T) {
 				t.Errorf("listComponentsToCreate() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			sort.Sort(statuspage.ComponentSort(got))
-			sort.Sort(statuspage.ComponentSort(tt.want))
+			sort.Sort(statuspagetypes.ComponentSort(got))
+			sort.Sort(statuspagetypes.ComponentSort(tt.want))
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("listComponentsToCreate() got = %v, want %v", got, tt.want)
 			}
@@ -133,23 +135,23 @@ func Test_listComponentsToCreate(t *testing.T) {
 func Test_listComponentsToDelete(t *testing.T) {
 	type args struct {
 		configComponentMap map[string]configuration.Component
-		remoteComponentMap map[string]statuspage.Component
+		remoteComponentMap map[string]statuspagetypes.Component
 	}
 	tests := []struct {
 		name string
 		args args
-		want []statuspage.Component
+		want []statuspagetypes.Component
 	}{
 		{
 			name: "Deletes components when not on remote",
 			args: args{
 				configComponentMap: map[string]configuration.Component{},
-				remoteComponentMap: map[string]statuspage.Component{
+				remoteComponentMap: map[string]statuspagetypes.Component{
 					"a component": {ID: "123", Name: "a component"},
 					"foobar":      {ID: "456", Name: "foobar"},
 				},
 			},
-			want: []statuspage.Component{{ID: "123", Name: "a component"}, {ID: "456", Name: "foobar"}},
+			want: []statuspagetypes.Component{{ID: "123", Name: "a component"}, {ID: "456", Name: "foobar"}},
 		},
 		{
 			name: "Ignores components not slated for deletion",
@@ -158,19 +160,19 @@ func Test_listComponentsToDelete(t *testing.T) {
 					"name": {Name: "name", Description: "foo"},
 					"new":  {Name: "new"},
 				},
-				remoteComponentMap: map[string]statuspage.Component{
+				remoteComponentMap: map[string]statuspagetypes.Component{
 					"name": {Name: "name", Description: "baz"},
 					"old":  {Name: "old"},
 				},
 			},
-			want: []statuspage.Component{{Name: "old"}},
+			want: []statuspagetypes.Component{{Name: "old"}},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := listComponentsToDelete(tt.args.configComponentMap, tt.args.remoteComponentMap)
-			sort.Sort(statuspage.ComponentSort(got))
-			sort.Sort(statuspage.ComponentSort(tt.want))
+			sort.Sort(statuspagetypes.ComponentSort(got))
+			sort.Sort(statuspagetypes.ComponentSort(tt.want))
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("listComponentsToDelete() = %v, want %v", got, tt.want)
 			}
@@ -181,12 +183,12 @@ func Test_listComponentsToDelete(t *testing.T) {
 func Test_listComponentsToModify(t *testing.T) {
 	type args struct {
 		configComponentMap map[string]configuration.Component
-		remoteComponentMap map[string]statuspage.Component
+		remoteComponentMap map[string]statuspagetypes.Component
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    []statuspage.Component
+		want    []statuspagetypes.Component
 		wantErr bool
 	}{
 		{
@@ -195,11 +197,11 @@ func Test_listComponentsToModify(t *testing.T) {
 				configComponentMap: map[string]configuration.Component{
 					"same name": {Name: "same name", Description: "new description", OnlyShowIfDegraded: false},
 				},
-				remoteComponentMap: map[string]statuspage.Component{
+				remoteComponentMap: map[string]statuspagetypes.Component{
 					"same name": {Name: "same name", Description: "old description", Showcase: true, Status: "operational"},
 				},
 			},
-			want: []statuspage.Component{{Name: "same name", Description: "new description", Showcase: true, Status: "operational"}},
+			want: []statuspagetypes.Component{{Name: "same name", Description: "new description", Showcase: true, Status: "operational"}},
 		},
 		{
 			name: "Translates the showcase field",
@@ -207,7 +209,7 @@ func Test_listComponentsToModify(t *testing.T) {
 				configComponentMap: map[string]configuration.Component{
 					"same name": {Name: "same name", OnlyShowIfDegraded: false},
 				},
-				remoteComponentMap: map[string]statuspage.Component{
+				remoteComponentMap: map[string]statuspagetypes.Component{
 					"same name": {Name: "same name", Showcase: true, Status: "operational"},
 				},
 			},
@@ -220,12 +222,12 @@ func Test_listComponentsToModify(t *testing.T) {
 					"name": {Name: "name", Description: "foo"},
 					"new":  {Name: "new"},
 				},
-				remoteComponentMap: map[string]statuspage.Component{
+				remoteComponentMap: map[string]statuspagetypes.Component{
 					"name": {Name: "name", Description: "baz", Showcase: true},
 					"old":  {Name: "old"},
 				},
 			},
-			want: []statuspage.Component{{Name: "name", Description: "foo", Showcase: true}},
+			want: []statuspagetypes.Component{{Name: "name", Description: "foo", Showcase: true}},
 		},
 	}
 	for _, tt := range tests {
@@ -235,8 +237,8 @@ func Test_listComponentsToModify(t *testing.T) {
 				t.Errorf("listComponentsToModify() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			sort.Sort(statuspage.ComponentSort(got))
-			sort.Sort(statuspage.ComponentSort(tt.want))
+			sort.Sort(statuspagetypes.ComponentSort(got))
+			sort.Sort(statuspagetypes.ComponentSort(tt.want))
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("listComponentsToModify() got = %v, want %v", got, tt.want)
 			}

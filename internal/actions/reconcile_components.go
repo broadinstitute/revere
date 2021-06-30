@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"reflect"
 
 	"github.com/broadinstitute/revere/internal/shared"
@@ -14,9 +15,9 @@ import (
 // listComponentsToDelete provides a slice of remote components that don't correlate to an entry in the configuration
 func listComponentsToDelete(
 	configComponentMap map[string]configuration.Component,
-	remoteComponentMap map[string]statuspage.Component,
-) []statuspage.Component {
-	var componentsToDelete []statuspage.Component
+	remoteComponentMap map[string]statuspagetypes.Component,
+) []statuspagetypes.Component {
+	var componentsToDelete []statuspagetypes.Component
 	for name, remoteComponent := range remoteComponentMap {
 		if _, found := configComponentMap[name]; !found {
 			componentsToDelete = append(componentsToDelete, remoteComponent)
@@ -28,13 +29,13 @@ func listComponentsToDelete(
 // listComponentsToCreate provides a slice of components that aren't present on the remote
 func listComponentsToCreate(
 	configComponentMap map[string]configuration.Component,
-	remoteComponentMap map[string]statuspage.Component,
-) ([]statuspage.Component, error) {
-	var componentsToCreate []statuspage.Component
+	remoteComponentMap map[string]statuspagetypes.Component,
+) ([]statuspagetypes.Component, error) {
+	var componentsToCreate []statuspagetypes.Component
 	for name, configComponent := range configComponentMap {
 		if _, found := remoteComponentMap[name]; !found {
-			var newComponent statuspage.Component
-			statuspage.ComponentConfigToApi(configComponent, &newComponent)
+			var newComponent statuspagetypes.Component
+			statuspagetypes.ComponentConfigToApi(configComponent, &newComponent)
 			// We specifically don't want status to be influenced by configuration file; components start out operational
 			newComponent.Status = "operational"
 			componentsToCreate = append(componentsToCreate, newComponent)
@@ -46,17 +47,17 @@ func listComponentsToCreate(
 // listComponentsToModify provides a slice of components that should be modified on the remote
 func listComponentsToModify(
 	configComponentMap map[string]configuration.Component,
-	remoteComponentMap map[string]statuspage.Component,
-) ([]statuspage.Component, error) {
-	var componentsToModify []statuspage.Component
+	remoteComponentMap map[string]statuspagetypes.Component,
+) ([]statuspagetypes.Component, error) {
+	var componentsToModify []statuspagetypes.Component
 	for name, configComponent := range configComponentMap {
 		if remoteComponent, found := remoteComponentMap[name]; found {
-			var modifiedComponent statuspage.Component
+			var modifiedComponent statuspagetypes.Component
 			err := mapstructure.Decode(remoteComponent, &modifiedComponent)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding statuspage.Component to statuspage.Component: %w", err)
 			}
-			statuspage.ComponentConfigToApi(configComponent, &modifiedComponent)
+			statuspagetypes.ComponentConfigToApi(configComponent, &modifiedComponent)
 			// if remote component is different from remote+configuration component, it must be modified
 			if !reflect.DeepEqual(remoteComponent, modifiedComponent) {
 				componentsToModify = append(componentsToModify, modifiedComponent)
@@ -74,7 +75,7 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 	if err != nil {
 		return err
 	}
-	statuspageComponentMap := make(map[string]statuspage.Component)
+	statuspageComponentMap := make(map[string]statuspagetypes.Component)
 	for _, statuspageComponent := range *statuspageComponents {
 		statuspageComponentMap[statuspageComponent.Name] = statuspageComponent
 	}

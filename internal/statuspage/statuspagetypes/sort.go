@@ -1,4 +1,4 @@
-package statuspage
+package statuspagetypes
 
 // ComponentSort sorts components based on ID and name, the only
 // guarantee being that it is self consistent across those fields.

@@ -1,9 +1,10 @@
-package statuspage
+package statuspagemocks
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/jarcoal/httpmock"
 	"math/rand"
 	"net/http"
@@ -22,13 +23,13 @@ func randStringRunes(length int) string {
 	return string(b)
 }
 
-// componentFactory helps make a unique component based on name alone.
+// ComponentFactory helps make a unique component based on name alone.
 // Creates an ID for the component to simplify testing, so that tests don't
 // need to preface tests with information-gathering GETs to the mock.
 // API functions themselves will strip out the ID before the component goes to
 // the server.
-func componentFactory(name string) *Component {
-	return &Component{
+func ComponentFactory(name string) *statuspagetypes.Component {
+	return &statuspagetypes.Component{
 		ID:     randStringRunes(8),
 		Name:   name,
 		Status: "operational",
@@ -49,7 +50,7 @@ func validatePageID(pageID string, request *http.Request) *http.Response {
 
 // validateComponentID returns a 404 response if a component ID wasn't present as the second regex of the request URL,
 // and nil otherwise
-func validateComponentID(components map[string]Component, request *http.Request) *http.Response {
+func validateComponentID(components map[string]statuspagetypes.Component, request *http.Request) *http.Response {
 	reqComponentID := httpmock.MustGetSubmatch(request, 2)
 	for id := range components {
 		if id == reqComponentID {
@@ -65,7 +66,7 @@ func validateComponentID(components map[string]Component, request *http.Request)
 // Any components given in the initial map or created via the mock will have their page ID properly set.
 // Created component IDs are incremented based on component map size and the number of deleted components.
 // The caller is responsible for activating/deactivating/resetting httpmock.
-func ConfigureComponentMock(config *configuration.Config, components map[string]Component) {
+func ConfigureComponentMock(config *configuration.Config, components map[string]statuspagetypes.Component) {
 	deletedComponentCount := 0
 	pageID := config.Statuspage.PageID
 	apiRoot := config.Statuspage.ApiRoot
@@ -78,7 +79,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
 			}
-			componentSlice := make([]Component, 0, len(components))
+			componentSlice := make([]statuspagetypes.Component, 0, len(components))
 			for _, component := range components {
 				componentSlice = append(componentSlice, component)
 			}
@@ -93,7 +94,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
 			}
-			var incomingBody struct{ Component Component }
+			var incomingBody struct{ Component statuspagetypes.Component }
 			if err := json.NewDecoder(request.Body).Decode(&incomingBody); err != nil {
 				return httpmock.NewStringResponse(400, err.Error()), nil
 			}
@@ -115,7 +116,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			if componentNotFound := validateComponentID(components, request); componentNotFound != nil {
 				return componentNotFound, nil
 			}
-			var incomingBody struct{ Component Component }
+			var incomingBody struct{ Component statuspagetypes.Component }
 			if err := json.NewDecoder(request.Body).Decode(&incomingBody); err != nil {
 				return httpmock.NewStringResponse(400, err.Error()), nil
 			}

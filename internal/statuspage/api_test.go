@@ -2,140 +2,13 @@ package statuspage
 
 import (
 	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
 	"reflect"
 	"testing"
 )
-
-func TestComponentConfigToApi(t *testing.T) {
-	type args struct {
-		configComponent configuration.Component
-		apiComponent    *Component
-	}
-	tests := []struct {
-		name string
-		args args
-		want *Component
-	}{
-		{
-			name: "Inverts showcase field",
-			args: args{
-				configComponent: configuration.Component{
-					HideUptime: false,
-				},
-				apiComponent: &Component{},
-			},
-			want: &Component{
-				Showcase: true,
-			},
-		},
-		{
-			name: "Translates fields",
-			args: args{
-				configComponent: configuration.Component{
-					Name:               "Foo",
-					Description:        "Bar",
-					OnlyShowIfDegraded: true,
-					HideUptime:         true,
-					StartDate:          "Baz",
-				},
-				apiComponent: &Component{},
-			},
-			want: &Component{
-				Name:               "Foo",
-				Description:        "Bar",
-				OnlyShowIfDegraded: true,
-				Showcase:           false,
-				StartDate:          "Baz",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ComponentConfigToApi(tt.args.configComponent, tt.args.apiComponent)
-			if !reflect.DeepEqual(tt.args.apiComponent, tt.want) {
-				t.Errorf("GetComponents() mutated = %v, want %v", tt.args.apiComponent, tt.want)
-			}
-		})
-	}
-}
-
-func TestComponent_toRequest(t *testing.T) {
-	type fields struct {
-		AutomationEmail    string
-		CreatedAt          string
-		Description        string
-		Group              bool
-		GroupID            string
-		ID                 string
-		Name               string
-		OnlyShowIfDegraded bool
-		PageID             string
-		Position           int
-		Showcase           bool
-		StartDate          string
-		Status             string
-		UpdatedAt          string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   requestComponent
-	}{
-		{
-			name: "Translates fields",
-			fields: fields{
-				AutomationEmail:    "a",
-				CreatedAt:          "b",
-				Description:        "c",
-				Group:              true,
-				GroupID:            "d",
-				ID:                 "e",
-				Name:               "f",
-				OnlyShowIfDegraded: true,
-				PageID:             "g",
-				Position:           1,
-				Showcase:           true,
-				StartDate:          "h",
-				Status:             "i",
-				UpdatedAt:          "j",
-			},
-			want: requestComponent{
-				Description:        "c",
-				GroupID:            "d",
-				Name:               "f",
-				OnlyShowIfDegraded: true,
-				Showcase:           true,
-				StartDate:          "h",
-				Status:             "i",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Component{
-				AutomationEmail:    tt.fields.AutomationEmail,
-				CreatedAt:          tt.fields.CreatedAt,
-				Description:        tt.fields.Description,
-				Group:              tt.fields.Group,
-				GroupID:            tt.fields.GroupID,
-				ID:                 tt.fields.ID,
-				Name:               tt.fields.Name,
-				OnlyShowIfDegraded: tt.fields.OnlyShowIfDegraded,
-				PageID:             tt.fields.PageID,
-				Position:           tt.fields.Position,
-				Showcase:           tt.fields.Showcase,
-				StartDate:          tt.fields.StartDate,
-				Status:             tt.fields.Status,
-				UpdatedAt:          tt.fields.UpdatedAt,
-			}
-			if got := c.toRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("toRequest() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func testConfig() *configuration.Config {
 	return &configuration.Config{
@@ -160,7 +33,7 @@ func TestDeleteComponent(t *testing.T) {
 		componentID string
 	}
 	config := testConfig()
-	component := componentFactory("to delete")
+	component := statuspagemocks.ComponentFactory("to delete")
 	tests := []struct {
 		name    string
 		args    args
@@ -187,7 +60,7 @@ func TestDeleteComponent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.ActivateNonDefault(tt.args.client.GetClient())
-			ConfigureComponentMock(config, map[string]Component{component.ID: *component})
+			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{component.ID: *component})
 			if err := DeleteComponent(tt.args.client, tt.args.pageID, tt.args.componentID); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteComponent() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -202,12 +75,12 @@ func TestGetComponents(t *testing.T) {
 		pageID string
 	}
 	config := testConfig()
-	component := componentFactory("to be returned")
+	component := statuspagemocks.ComponentFactory("to be returned")
 	component.PageID = config.Statuspage.PageID
 	tests := []struct {
 		name    string
 		args    args
-		want    *[]Component
+		want    *[]statuspagetypes.Component
 		wantErr bool
 	}{
 		{
@@ -216,7 +89,7 @@ func TestGetComponents(t *testing.T) {
 				client: Client(config),
 				pageID: config.Statuspage.PageID,
 			},
-			want: &[]Component{*component},
+			want: &[]statuspagetypes.Component{*component},
 		},
 		{
 			name: "Fails on 404",
@@ -230,7 +103,7 @@ func TestGetComponents(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.ActivateNonDefault(tt.args.client.GetClient())
-			ConfigureComponentMock(config, map[string]Component{component.ID: *component})
+			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{component.ID: *component})
 			got, err := GetComponents(tt.args.client, tt.args.pageID)
 			httpmock.DeactivateAndReset()
 			if (err != nil) != tt.wantErr {
@@ -249,18 +122,18 @@ func TestPatchComponent(t *testing.T) {
 		client      *resty.Client
 		pageID      string
 		componentID string
-		component   Component
+		component   statuspagetypes.Component
 	}
 	config := testConfig()
-	baseComponent := componentFactory("to be edited")
+	baseComponent := statuspagemocks.ComponentFactory("to be edited")
 	baseComponent.PageID = config.Statuspage.PageID
-	modifiedComponent := componentFactory("edited component")
+	modifiedComponent := statuspagemocks.ComponentFactory("edited component")
 	modifiedComponent.ID = baseComponent.ID
 	modifiedComponent.PageID = config.Statuspage.PageID
 	tests := []struct {
 		name    string
 		args    args
-		want    *Component
+		want    *statuspagetypes.Component
 		wantErr bool
 	}{
 		{
@@ -297,7 +170,7 @@ func TestPatchComponent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.ActivateNonDefault(tt.args.client.GetClient())
-			ConfigureComponentMock(config, map[string]Component{baseComponent.ID: *baseComponent})
+			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{baseComponent.ID: *baseComponent})
 			got, err := PatchComponent(tt.args.client, tt.args.pageID, tt.args.componentID, tt.args.component)
 			httpmock.DeactivateAndReset()
 			if (err != nil) != tt.wantErr {
@@ -315,14 +188,14 @@ func TestPostComponent(t *testing.T) {
 	type args struct {
 		client    *resty.Client
 		pageID    string
-		component Component
+		component statuspagetypes.Component
 	}
 	config := testConfig()
-	newComponent := componentFactory("to be created")
+	newComponent := statuspagemocks.ComponentFactory("to be created")
 	tests := []struct {
 		name    string
 		args    args
-		want    *Component
+		want    *statuspagetypes.Component
 		wantErr bool
 	}{
 		{
@@ -347,8 +220,8 @@ func TestPostComponent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.ActivateNonDefault(tt.args.client.GetClient())
-			componentMap := map[string]Component{}
-			ConfigureComponentMock(config, componentMap)
+			componentMap := map[string]statuspagetypes.Component{}
+			statuspagemocks.ConfigureComponentMock(config, componentMap)
 			got, err := PostComponent(tt.args.client, tt.args.pageID, tt.args.component)
 			httpmock.DeactivateAndReset()
 			if (err != nil) != tt.wantErr {

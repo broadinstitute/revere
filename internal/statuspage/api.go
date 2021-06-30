@@ -2,100 +2,44 @@ package statuspage
 
 import (
 	"fmt"
-	"github.com/broadinstitute/revere/internal/configuration"
-
 	"github.com/broadinstitute/revere/internal/shared"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
 )
 
-// Component represents how Statuspage returns components in its API.
-// This is an exact superset of what Statuspage accepts as input for components,
-// which is in turn an exact superset of pkg.Component.
-type Component struct {
-	AutomationEmail    string `json:"automation_email"`
-	CreatedAt          string `json:"created_at"`
-	Description        string `json:"description"`
-	Group              bool   `json:"group"`
-	GroupID            string `json:"group_id"`
-	ID                 string `json:"id"`
-	Name               string `json:"name"`
-	OnlyShowIfDegraded bool   `json:"only_show_if_degraded"`
-	PageID             string `json:"page_id"`
-	Position           int    `json:"position"`
-	Showcase           bool   `json:"showcase"`
-	StartDate          string `json:"start_date"`
-	Status             string `json:"status"`
-	UpdatedAt          string `json:"updated_at"`
-}
-
-func ComponentConfigToApi(configComponent configuration.Component, apiComponent *Component) {
-	apiComponent.Name = configComponent.Name
-	apiComponent.Description = configComponent.Description
-	apiComponent.OnlyShowIfDegraded = configComponent.OnlyShowIfDegraded
-	apiComponent.StartDate = configComponent.StartDate
-	apiComponent.Showcase = !configComponent.HideUptime
-}
-
-// requestComponent represents what Statuspage accepts as input for components.
-// This is necessary because Statuspage errors if unexpected keys are present
-// in request JSON (???) so we must reduce Component down to this type.
-type requestComponent struct {
-	Description        string `json:"description"`
-	GroupID            string `json:"group_id,omitempty"`
-	Name               string `json:"name,omitempty"`
-	OnlyShowIfDegraded bool   `json:"only_show_if_degraded"`
-	Showcase           bool   `json:"showcase"`
-	StartDate          string `json:"start_date,omitempty"`
-	Status             string `json:"status,omitempty"`
-}
-
-// toRequest converts Component to requestComponent in a type-safe way to avoid
-// needing to handle mapstructure.decode(...) errors
-func (c *Component) toRequest() requestComponent {
-	return requestComponent{
-		Description:        c.Description,
-		Status:             c.Status,
-		Name:               c.Name,
-		OnlyShowIfDegraded: c.OnlyShowIfDegraded,
-		GroupID:            c.GroupID,
-		Showcase:           c.Showcase,
-		StartDate:          c.StartDate,
-	}
-}
-
 // GetComponents provides a slice of all components on the remote page
-func GetComponents(client *resty.Client, pageID string) (*[]Component, error) {
+func GetComponents(client *resty.Client, pageID string) (*[]statuspagetypes.Component, error) {
 	resp, err := client.R().
-		SetResult([]Component{}).
+		SetResult([]statuspagetypes.Component{}).
 		Get(fmt.Sprintf("/pages/%s/components", pageID))
 	if err = shared.CheckResponse(resp, err); err != nil {
 		return nil, err
 	}
-	return resp.Result().(*[]Component), nil
+	return resp.Result().(*[]statuspagetypes.Component), nil
 }
 
 // PostComponent creates a new component on the remote page
-func PostComponent(client *resty.Client, pageID string, component Component) (*Component, error) {
+func PostComponent(client *resty.Client, pageID string, component statuspagetypes.Component) (*statuspagetypes.Component, error) {
 	resp, err := client.R().
-		SetResult(Component{}).
-		SetBody(map[string]interface{}{"component": component.toRequest()}).
+		SetResult(statuspagetypes.Component{}).
+		SetBody(map[string]interface{}{"component": component.ToRequest()}).
 		Post(fmt.Sprintf("/pages/%s/components", pageID))
 	if err = shared.CheckResponse(resp, err); err != nil {
 		return nil, err
 	}
-	return resp.Result().(*Component), nil
+	return resp.Result().(*statuspagetypes.Component), nil
 }
 
 // PatchComponent updates an existing component on the remote page by the component's ID, not name
-func PatchComponent(client *resty.Client, pageID string, componentID string, component Component) (*Component, error) {
+func PatchComponent(client *resty.Client, pageID string, componentID string, component statuspagetypes.Component) (*statuspagetypes.Component, error) {
 	resp, err := client.R().
-		SetResult(Component{}).
-		SetBody(map[string]interface{}{"component": component.toRequest()}).
+		SetResult(statuspagetypes.Component{}).
+		SetBody(map[string]interface{}{"component": component.ToRequest()}).
 		Patch(fmt.Sprintf("/pages/%s/components/%s", pageID, componentID))
 	if err = shared.CheckResponse(resp, err); err != nil {
 		return nil, err
 	}
-	return resp.Result().(*Component), nil
+	return resp.Result().(*statuspagetypes.Component), nil
 }
 
 // DeleteComponent deletes an existing component on the remote page by the component's ID, not name
