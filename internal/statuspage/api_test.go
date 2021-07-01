@@ -76,7 +76,10 @@ func TestGetComponents(t *testing.T) {
 	}
 	config := testConfig()
 	component := statuspagemocks.ComponentFactory("to be returned")
+	group := statuspagemocks.ComponentFactory("a group component that shouldn't be returned")
 	component.PageID = config.Statuspage.PageID
+	group.PageID = config.Statuspage.PageID
+	group.Group = true
 	tests := []struct {
 		name    string
 		args    args
@@ -103,7 +106,10 @@ func TestGetComponents(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.ActivateNonDefault(tt.args.client.GetClient())
-			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{component.ID: *component})
+			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{
+				component.ID: *component,
+				group.ID:     *group,
+			})
 			got, err := GetComponents(tt.args.client, tt.args.pageID)
 			httpmock.DeactivateAndReset()
 			if (err != nil) != tt.wantErr {

@@ -7,7 +7,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// GetComponents provides a slice of all components on the remote page
+// GetComponents provides a slice of all components (NOT groups) on the remote page
 func GetComponents(client *resty.Client, pageID string) (*[]statuspagetypes.Component, error) {
 	resp, err := client.R().
 		SetResult([]statuspagetypes.Component{}).
@@ -15,7 +15,14 @@ func GetComponents(client *resty.Client, pageID string) (*[]statuspagetypes.Comp
 	if err = shared.CheckResponse(resp, err); err != nil {
 		return nil, err
 	}
-	return resp.Result().(*[]statuspagetypes.Component), nil
+	componentsWithGroups := resp.Result().(*[]statuspagetypes.Component)
+	componentsWithoutGroups := make([]statuspagetypes.Component, 0, len(*componentsWithGroups))
+	for _, component := range *componentsWithGroups {
+		if !component.Group {
+			componentsWithoutGroups = append(componentsWithoutGroups, component)
+		}
+	}
+	return &componentsWithoutGroups, nil
 }
 
 // PostComponent creates a new component on the remote page
