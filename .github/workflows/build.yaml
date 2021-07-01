@@ -9,10 +9,6 @@ name: Bump, Tag, and Publish
 #
 # When run on a PR, it simulates bumping the tag and appends a hash to the pushed image.
 #
-# When run on a hotfix branch, it tags and generates the hotfix version
-#
-# When run manually, you can specify the part of the semantic version to bump
-#
 # The workflow relies on github secrets:
 # - GCP_PUBLISH_EMAIL - SA email for publishing to dsp-artifact-registry
 # - GCP_PUBLISH_KEY_B64 - SA key (Base64-encoded JSON string) for publishing to dsp-artifact-registry
@@ -49,7 +45,6 @@ jobs:
         env:
           DEFAULT_BUMP: patch
           GITHUB_TOKEN: ${{ secrets.BROADBOT_TOKEN }}
-          HOTFIX_BRANCHES: hotfix.*
           RELEASE_BRANCHES: main
           WITH_V: true
 
