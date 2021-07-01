@@ -3,13 +3,12 @@ package actions
 import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
-	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
-	"reflect"
-
 	"github.com/broadinstitute/revere/internal/shared"
 	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
+	"reflect"
 )
 
 // listComponentsToDelete provides a slice of remote components that don't correlate to an entry in the configuration
