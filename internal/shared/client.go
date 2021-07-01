@@ -3,7 +3,6 @@ package shared
 import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
-
 	"github.com/go-resty/resty/v2"
 )
 
