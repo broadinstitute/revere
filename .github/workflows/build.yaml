@@ -26,16 +26,6 @@ on:
       - main
     paths-ignore:
       - 'README.md'
-  workflow_dispatch:
-    inputs:
-      bump:
-        description: 'Part of the version to bump: major, minor, patch'
-        required: false
-        default: 'minor'
-      branch:
-        description: 'Branch to run the workflow on'
-        required: false
-        default: 'main'
 env:
   GOOGLE_PROJECT: dsp-artifact-registry
   # Name of the app-specific Docker repository configured in GOOGLE_PROJECT
@@ -48,24 +38,9 @@ jobs:
   tag-publish-job:
     runs-on: ubuntu-latest
     steps:
-      - name: Set part of semantic version to bump
-        id: semver
-        run: |
-          SEMVER_PART=""
-          CHECKOUT_BRANCH="$GITHUB_REF"
-          if ${{github.event_name == 'push' }}; then
-            SEMVER_PART="patch"
-          elif ${{github.event_name == 'workflow_dispatch' }}; then
-            SEMVER_PART=${{ github.event.inputs.bump }}
-            CHECKOUT_BRANCH=${{ github.event.inputs.branch }}
-          fi
-          echo ::set-output name=semver-part::$SEMVER_PART
-          echo ::set-output name=checkout-branch::$CHECKOUT_BRANCH
-
       - name: Checkout current code
         uses: actions/checkout@v2
         with:
-          ref: ${{ steps.semver.outputs.checkout-branch }}
           token: ${{ secrets.BROADBOT_TOKEN }}
 
       - name: Bump the tag to a new version
@@ -75,7 +50,6 @@ jobs:
           DEFAULT_BUMP: patch
           GITHUB_TOKEN: ${{ secrets.BROADBOT_TOKEN }}
           HOTFIX_BRANCHES: hotfix.*
-          OVERRIDE_BUMP: ${{ steps.semver.outputs.semver-part }}
           RELEASE_BRANCHES: main
           WITH_V: true
 
