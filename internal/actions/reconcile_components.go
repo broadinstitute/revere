@@ -68,7 +68,7 @@ func listComponentsToModify(
 
 // ReconcileComponents modifies the set of components on Statuspage.io to match what is given in the config file.
 // It creates statuspage.Component slices for deletion, creation, and modification, and then hands that data
-// to the correct functions in statuspage/api.go
+// to the correct functions in statuspage/component_api.go
 func ReconcileComponents(config *configuration.Config, client *resty.Client) error {
 	statuspageComponents, err := statuspage.GetComponents(client, config.Statuspage.PageID)
 	if err != nil {
