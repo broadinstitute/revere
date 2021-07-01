@@ -44,6 +44,7 @@ type Config struct {
 		PageID     string `validate:"required"`
 		ApiRoot    string // default: "https://api.statuspage.io/v1"
 		Components []Component
+		Groups     []ComponentGroup
 	}
 }
 
@@ -58,6 +59,15 @@ type Component struct {
 	HideUptime bool
 	// Date the component existed from, in the form YYYY-MM-DD
 	StartDate string `validate:"required"`
+}
+
+// ComponentGroup configuration--note that leaving any of the below unfilled will use Go's "zero" value (false/empty)
+type ComponentGroup struct {
+	// Unique but user-readable group name
+	Name        string `validate:"required"`
+	Description string
+	// Exact names of components to include in the group
+	ComponentNames []string
 }
 
 // newDefaultConfig sets config defaults only as described above
