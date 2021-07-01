@@ -22,7 +22,9 @@ type Component struct {
 	UpdatedAt          string `json:"updated_at"`
 }
 
-func ComponentConfigToApi(configComponent configuration.Component, apiComponent *Component) {
+// MergeConfigComponentToApi overwrites fields of the Component with that of the one from the config.
+// Does not create a new Component so that it can be used for merging and difference finding.
+func MergeConfigComponentToApi(configComponent configuration.Component, apiComponent *Component) {
 	apiComponent.Name = configComponent.Name
 	apiComponent.Description = configComponent.Description
 	apiComponent.OnlyShowIfDegraded = configComponent.OnlyShowIfDegraded

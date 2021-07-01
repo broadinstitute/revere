@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/broadinstitute/revere/internal/actions"
-	config2 "github.com/broadinstitute/revere/internal/configuration"
+	"github.com/broadinstitute/revere/internal/configuration"
 	"github.com/broadinstitute/revere/internal/statuspage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -20,7 +20,7 @@ diff would identify no changes.`,
 }
 
 func Prepare(*cobra.Command, []string) {
-	config, err := config2.AssembleConfig(viper.GetViper())
+	config, err := configuration.AssembleConfig(viper.GetViper())
 	cobra.CheckErr(err)
 	client := statuspage.Client(config)
 	err = actions.ReconcileComponents(config, client)
