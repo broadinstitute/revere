@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/terra-status-manager.iml" filepath="$PROJECT_DIR$/.idea/terra-status-manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/revere.iml" filepath="$PROJECT_DIR$/.idea/revere.iml" />
     </modules>
   </component>
 </project>

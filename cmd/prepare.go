@@ -1,28 +1,30 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/spf13/viper"
-
+	"github.com/broadinstitute/revere/internal/actions"
+	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/broadinstitute/revere/internal/statuspage"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// prepareCmd represents the prepare command
 var prepareCmd = &cobra.Command{
 	Use:   "prepare",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Configure Statuspage.io based on the configuration",
+	Long: `This command diffs the Statuspage components and groups from
+the configuration with what's present on the remote, matching
+based on name alone. It then sequentially deletes,
+creates, and patches resources such that a subsequent
+diff would identify no changes.`,
+	Run: Prepare,
+}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("prepare called")
-		if viper.GetBool("verbose") {
-			fmt.Println(viper.GetString("statuspage.apiKey"))
-		}
-	},
+func Prepare(*cobra.Command, []string) {
+	config, err := configuration.AssembleConfig(viper.GetViper())
+	cobra.CheckErr(err)
+	client := statuspage.Client(config)
+	err = actions.ReconcileComponents(config, client)
+	cobra.CheckErr(err)
 }
 
 func init() {

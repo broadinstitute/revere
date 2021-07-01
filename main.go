@@ -1,7 +1,7 @@
 package main
 
-import "github.com/broadinstitute/terra-status-manager/cmd"
+import "github.com/broadinstitute/revere/cmd"
 
 func main() {
-    cmd.Execute()
+	cmd.Execute()
 }
