@@ -37,7 +37,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			return resp, nil
 		})
-	httpmock.RegisterResponder("POST", fmt.Sprintf(`=~^%s/pages/(\w+)/co`, apiRoot),
+	httpmock.RegisterResponder("POST", fmt.Sprintf(`=~^%s/pages/(\w+)/components`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
