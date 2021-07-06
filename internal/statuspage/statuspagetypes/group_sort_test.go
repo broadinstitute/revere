@@ -19,13 +19,13 @@ func TestGroupSort(t *testing.T) {
 		},
 		{
 			name:  "Sorts when necessary",
-			given: []Group{{ID: "123"}, {Name: "foo"}, {Position: "3"}},
-			want:  []Group{{Position: "3"}, {Name: "foo"}, {ID: "123"}},
+			given: []Group{{ID: "123"}, {Name: "foo"}, {Position: 3}},
+			want:  []Group{{Position: 3}, {Name: "foo"}, {ID: "123"}},
 		},
 		{
 			name:  "Doesn't sort when stable",
-			given: []Group{{Position: "3"}, {Name: "foo"}, {ID: "123"}},
-			want:  []Group{{Position: "3"}, {Name: "foo"}, {ID: "123"}},
+			given: []Group{{Position: 3}, {Name: "foo"}, {ID: "123"}},
+			want:  []Group{{Position: 3}, {Name: "foo"}, {ID: "123"}},
 		},
 		{
 			name:  "Sorts ID/Name specifically",

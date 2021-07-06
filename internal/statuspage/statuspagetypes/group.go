@@ -15,7 +15,7 @@ type Group struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
 	PageID      string   `json:"page_id"`
-	Position    string   `json:"position"`
+	Position    int      `json:"position"`
 	UpdatedAt   string   `json:"updated_at"`
 }
 

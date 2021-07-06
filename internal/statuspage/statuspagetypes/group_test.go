@@ -14,7 +14,7 @@ func TestGroup_ToRequest(t *testing.T) {
 		ID          string
 		Name        string
 		PageID      string
-		Position    string
+		Position    int
 		UpdatedAt   string
 	}
 	tests := []struct {
@@ -46,7 +46,7 @@ func TestGroup_ToRequest(t *testing.T) {
 				ID:          "5",
 				Name:        "6",
 				PageID:      "7",
-				Position:    "8",
+				Position:    8,
 				UpdatedAt:   "9",
 			},
 			want: RequestGroup{
