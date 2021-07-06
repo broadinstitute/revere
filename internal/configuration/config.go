@@ -67,7 +67,7 @@ type ComponentGroup struct {
 	Name        string `validate:"required"`
 	Description string
 	// Exact names of components to include in the group
-	ComponentNames []string
+	ComponentNames []string `validate:"required"`
 }
 
 // newDefaultConfig sets config defaults only as described above
