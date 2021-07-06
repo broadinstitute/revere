@@ -31,8 +31,9 @@ func TestGroup_ToRequest(t *testing.T) {
 			},
 			want: RequestGroup{
 				ComponentGroup: struct {
-					Components []string `json:"components"`
-					Name       string   `json:"name"`
+					Components  []string `json:"components"`
+					Name        string   `json:"name"`
+					Description string   `json:"description"`
 				}{Components: []string{"foo"}, Name: "baz"},
 				Description: "bar",
 			},
@@ -51,8 +52,9 @@ func TestGroup_ToRequest(t *testing.T) {
 			},
 			want: RequestGroup{
 				ComponentGroup: struct {
-					Components []string `json:"components"`
-					Name       string   `json:"name"`
+					Components  []string `json:"components"`
+					Name        string   `json:"name"`
+					Description string   `json:"description"`
 				}{Components: []string{"1", "2"}, Name: "6"},
 				Description: "4",
 			},
@@ -90,12 +92,12 @@ func TestMergeConfigGroupToApi(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Translates name to ID",
+			name: "Translates name to ID and sorts",
 			args: args{
 				configGroup: configuration.ComponentGroup{
 					Name:           "Group",
 					Description:    "A group",
-					ComponentNames: []string{"Some component", "Another component"},
+					ComponentNames: []string{"Another component", "Some component"},
 				},
 				apiGroup: &Group{
 					ID: "123",

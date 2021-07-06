@@ -3,6 +3,7 @@ package statuspagetypes
 import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
+	"sort"
 )
 
 // Group represents how Statuspage represents component groups in its API.
@@ -21,6 +22,7 @@ type Group struct {
 
 // MergeConfigGroupToApi overwrites fields of the Group with what of the one from the config.
 // Does not create a new Group so that it can be used for merging and difference finding.
+// Sorts component IDs.
 func MergeConfigGroupToApi(configGroup configuration.ComponentGroup, apiGroup *Group, componentNameToID map[string]string) error {
 	apiGroup.Name = configGroup.Name
 	apiGroup.Description = configGroup.Description
@@ -32,6 +34,7 @@ func MergeConfigGroupToApi(configGroup configuration.ComponentGroup, apiGroup *G
 		}
 		componentIDs = append(componentIDs, id)
 	}
+	sort.Strings(componentIDs)
 	apiGroup.Components = componentIDs
 	return nil
 }
@@ -39,10 +42,19 @@ func MergeConfigGroupToApi(configGroup configuration.ComponentGroup, apiGroup *G
 // RequestGroup represents what Statuspage accepts as input for groups.
 // This is necessary because the request structure is notably different from that
 // received as a response.
+// NOTE: As of 7/6/2021, the documentation for the request payload is wrong!
+// The docs say that the description field should only occur on the outer object,
+// and while providing it there does not error, it appears to be a no-op. No docs
+// mention that the field can exist on the interior ComponentGroup object, but
+// doing so doesn't error and correctly sets the fields.
+// I'm leaving the field in both places, to hopefully be forwards/backwards
+// compatible with whatever Atlassian does to fix this inconsistency. If they
+// make one field start to error, we'd find out about it on app startup, not runtime.
 type RequestGroup struct {
 	ComponentGroup struct {
-		Components []string `json:"components"`
-		Name       string   `json:"name"`
+		Components  []string `json:"components"`
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
 	} `json:"component_group"`
 	Description string `json:"description"`
 }
@@ -51,11 +63,13 @@ type RequestGroup struct {
 func (g *Group) ToRequest() RequestGroup {
 	return RequestGroup{
 		ComponentGroup: struct {
-			Components []string `json:"components"`
-			Name       string   `json:"name"`
+			Components  []string `json:"components"`
+			Name        string   `json:"name"`
+			Description string   `json:"description"`
 		}{
-			Components: g.Components,
-			Name:       g.Name,
+			Components:  g.Components,
+			Name:        g.Name,
+			Description: g.Description,
 		},
 		Description: g.Description,
 	}
