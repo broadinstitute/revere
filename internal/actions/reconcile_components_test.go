@@ -119,11 +119,7 @@ func Test_listComponentsToCreate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := listComponentsToCreate(tt.args.configComponentMap, tt.args.remoteComponentMap)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("listComponentsToCreate() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := listComponentsToCreate(tt.args.configComponentMap, tt.args.remoteComponentMap)
 			sort.Sort(statuspagetypes.ComponentSort(got))
 			sort.Sort(statuspagetypes.ComponentSort(tt.want))
 			if !reflect.DeepEqual(got, tt.want) {
