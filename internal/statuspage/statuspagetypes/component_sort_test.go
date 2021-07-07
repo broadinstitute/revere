@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestStableSort(t *testing.T) {
+func TestComponentSort(t *testing.T) {
 	tests := []struct {
 		name  string
 		given []Component

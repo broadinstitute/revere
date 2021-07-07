@@ -4,7 +4,7 @@ import "github.com/broadinstitute/revere/internal/configuration"
 
 // Component represents how Statuspage returns components in its API.
 // This is an exact superset of what Statuspage accepts as input for components,
-// which is in turn an exact superset of pkg.Component.
+// which is in turn an exact superset of configuration.Component.
 type Component struct {
 	AutomationEmail    string `json:"automation_email"`
 	CreatedAt          string `json:"created_at"`

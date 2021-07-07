@@ -26,6 +26,7 @@ func TestClient(t *testing.T) {
 						PageID     string `validate:"required"`
 						ApiRoot    string
 						Components []configuration.Component
+						Groups     []configuration.ComponentGroup
 					}{},
 				},
 			},
@@ -43,6 +44,7 @@ func TestClient(t *testing.T) {
 						PageID     string `validate:"required"`
 						ApiRoot    string
 						Components []configuration.Component
+						Groups     []configuration.ComponentGroup
 					}{ApiKey: "foo"},
 				},
 			},
@@ -60,6 +62,7 @@ func TestClient(t *testing.T) {
 						PageID     string `validate:"required"`
 						ApiRoot    string
 						Components []configuration.Component
+						Groups     []configuration.ComponentGroup
 					}{ApiRoot: "https://example.com"},
 				},
 			},

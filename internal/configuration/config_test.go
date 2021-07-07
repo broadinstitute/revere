@@ -40,6 +40,7 @@ func TestAssembleConfig(t *testing.T) {
 					PageID     string `validate:"required"`
 					ApiRoot    string
 					Components []Component
+					Groups     []ComponentGroup
 				}{
 					ApiKey:  "foo",
 					PageID:  "bar",
@@ -85,6 +86,7 @@ func Test_newDefaultConfig(t *testing.T) {
 					PageID     string `validate:"required"`
 					ApiRoot    string
 					Components []Component
+					Groups     []ComponentGroup
 				}{
 					ApiRoot: "https://api.statuspage.io/v1",
 				},
