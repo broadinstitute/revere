@@ -25,8 +25,8 @@ func TestClient(t *testing.T) {
 						ApiKey     string `validate:"required"`
 						PageID     string `validate:"required"`
 						ApiRoot    string
-						Components []configuration.Component
-						Groups     []configuration.ComponentGroup
+						Components []configuration.Component      `validate:"unique=Name,dive"`
+						Groups     []configuration.ComponentGroup `validate:"unique=Name,dive"`
 					}{},
 				},
 			},
@@ -43,8 +43,8 @@ func TestClient(t *testing.T) {
 						ApiKey     string `validate:"required"`
 						PageID     string `validate:"required"`
 						ApiRoot    string
-						Components []configuration.Component
-						Groups     []configuration.ComponentGroup
+						Components []configuration.Component      `validate:"unique=Name,dive"`
+						Groups     []configuration.ComponentGroup `validate:"unique=Name,dive"`
 					}{ApiKey: "foo"},
 				},
 			},
@@ -61,8 +61,8 @@ func TestClient(t *testing.T) {
 						ApiKey     string `validate:"required"`
 						PageID     string `validate:"required"`
 						ApiRoot    string
-						Components []configuration.Component
-						Groups     []configuration.ComponentGroup
+						Components []configuration.Component      `validate:"unique=Name,dive"`
+						Groups     []configuration.ComponentGroup `validate:"unique=Name,dive"`
 					}{ApiRoot: "https://example.com"},
 				},
 			},

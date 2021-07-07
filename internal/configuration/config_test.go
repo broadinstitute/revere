@@ -39,8 +39,8 @@ func TestAssembleConfig(t *testing.T) {
 					ApiKey     string `validate:"required"`
 					PageID     string `validate:"required"`
 					ApiRoot    string
-					Components []Component
-					Groups     []ComponentGroup
+					Components []Component      `validate:"unique=Name,dive"`
+					Groups     []ComponentGroup `validate:"unique=Name,dive"`
 				}{
 					ApiKey:  "foo",
 					PageID:  "bar",
@@ -85,8 +85,8 @@ func Test_newDefaultConfig(t *testing.T) {
 					ApiKey     string `validate:"required"`
 					PageID     string `validate:"required"`
 					ApiRoot    string
-					Components []Component
-					Groups     []ComponentGroup
+					Components []Component      `validate:"unique=Name,dive"`
+					Groups     []ComponentGroup `validate:"unique=Name,dive"`
 				}{
 					ApiRoot: "https://api.statuspage.io/v1",
 				},

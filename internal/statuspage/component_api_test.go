@@ -21,8 +21,8 @@ func testConfig() *configuration.Config {
 			ApiKey     string `validate:"required"`
 			PageID     string `validate:"required"`
 			ApiRoot    string
-			Components []configuration.Component
-			Groups     []configuration.ComponentGroup
+			Components []configuration.Component      `validate:"unique=Name,dive"`
+			Groups     []configuration.ComponentGroup `validate:"unique=Name,dive"`
 		}{ApiKey: "foo", PageID: "baz", ApiRoot: "https://localhost"},
 	}
 }

@@ -27,8 +27,8 @@ func TestReconcileComponents(t *testing.T) {
 			ApiKey     string `validate:"required"`
 			PageID     string `validate:"required"`
 			ApiRoot    string
-			Components []configuration.Component
-			Groups     []configuration.ComponentGroup
+			Components []configuration.Component      `validate:"unique=Name,dive"`
+			Groups     []configuration.ComponentGroup `validate:"unique=Name,dive"`
 		}{ApiKey: "key", PageID: "foo", ApiRoot: "https://localhost",
 			Components: []configuration.Component{
 				{Name: "Same", Description: "Same description"},
