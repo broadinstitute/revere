@@ -34,7 +34,7 @@ func TestGroup_ToRequest(t *testing.T) {
 					Components  []string `json:"components"`
 					Name        string   `json:"name"`
 					Description string   `json:"description"`
-				}{Components: []string{"foo"}, Name: "baz"},
+				}{Components: []string{"foo"}, Name: "baz", Description: "bar"},
 				Description: "bar",
 			},
 		},
@@ -55,7 +55,7 @@ func TestGroup_ToRequest(t *testing.T) {
 					Components  []string `json:"components"`
 					Name        string   `json:"name"`
 					Description string   `json:"description"`
-				}{Components: []string{"1", "2"}, Name: "6"},
+				}{Components: []string{"1", "2"}, Name: "6", Description: "4"},
 				Description: "4",
 			},
 		},
