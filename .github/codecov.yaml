@@ -4,10 +4,14 @@ coverage:
     project:
       default:
         # Codecov switched to informational mode so that it never fails PRs based on coverage.
+        #
         #   Some Go patterns (`return err`, namely) are very hard to test "up the stack", to
         #   the point that using thoroughly-tested functions more frequently decreases
         #   coverage at the call-site. Since coverage is unattainable with some frequency,
         #   we have to treat this data as merely informational.
+        #
+        #   See https://broadinstitute.slack.com/archives/CADU7L0SZ/p1625682491235200 for
+        #   discussion on this decision likely being temporary.
         informational: true
     patch:
       default:
