@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/broadinstitute/revere/internal/actions"
 	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/broadinstitute/revere/internal/shared"
 	"github.com/broadinstitute/revere/internal/statuspage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -23,7 +24,11 @@ func Prepare(*cobra.Command, []string) {
 	config, err := configuration.AssembleConfig(viper.GetViper())
 	cobra.CheckErr(err)
 	client := statuspage.Client(config)
+	shared.LogLn(config, "reconciling components...")
 	err = actions.ReconcileComponents(config, client)
+	cobra.CheckErr(err)
+	shared.LogLn(config, "reconciling groups...")
+	err = actions.ReconcileGroups(config, client)
 	cobra.CheckErr(err)
 }
 

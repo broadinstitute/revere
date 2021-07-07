@@ -18,9 +18,9 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 	deletedComponentCount := 0
 	pageID := config.Statuspage.PageID
 	apiRoot := config.Statuspage.ApiRoot
-	for key, component := range components {
+	for id, component := range components {
 		component.PageID = pageID
-		components[key] = component
+		components[id] = component
 	}
 	httpmock.RegisterResponder("GET", fmt.Sprintf(`=~^%s/pages/(\w+)/components`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
