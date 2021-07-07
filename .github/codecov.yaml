@@ -1,0 +1,14 @@
+# Validate with `cat .github/codecov.yaml | curl --data-binary @- https://codecov.io/validate`.
+coverage:
+  status:
+    project:
+      default:
+        # Codecov switched to informational mode so that it never fails PRs based on coverage.
+        #   Some Go patterns (`return err`, namely) are very hard to test "up the stack", to
+        #   the point that using thoroughly-tested functions more frequently decreases
+        #   coverage at the call-site. Since coverage is unattainable with some frequency,
+        #   we have to treat this data as merely informational.
+        informational: true
+    patch:
+      default:
+        informational: true
