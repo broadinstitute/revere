@@ -27,8 +27,8 @@ func TestReconcileComponents(t *testing.T) {
 			ApiKey     string `validate:"required"`
 			PageID     string `validate:"required"`
 			ApiRoot    string
-			Components []configuration.Component
-			Groups     []configuration.ComponentGroup
+			Components []configuration.Component      `validate:"unique=Name,dive"`
+			Groups     []configuration.ComponentGroup `validate:"unique=Name,dive"`
 		}{ApiKey: "key", PageID: "foo", ApiRoot: "https://localhost",
 			Components: []configuration.Component{
 				{Name: "Same", Description: "Same description"},
@@ -119,11 +119,7 @@ func Test_listComponentsToCreate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := listComponentsToCreate(tt.args.configComponentMap, tt.args.remoteComponentMap)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("listComponentsToCreate() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := listComponentsToCreate(tt.args.configComponentMap, tt.args.remoteComponentMap)
 			sort.Sort(statuspagetypes.ComponentSort(got))
 			sort.Sort(statuspagetypes.ComponentSort(tt.want))
 			if !reflect.DeepEqual(got, tt.want) {

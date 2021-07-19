@@ -29,7 +29,7 @@ func listComponentsToDelete(
 func listComponentsToCreate(
 	configComponentMap map[string]configuration.Component,
 	remoteComponentMap map[string]statuspagetypes.Component,
-) ([]statuspagetypes.Component, error) {
+) []statuspagetypes.Component {
 	var componentsToCreate []statuspagetypes.Component
 	for name, configComponent := range configComponentMap {
 		if _, found := remoteComponentMap[name]; !found {
@@ -40,7 +40,7 @@ func listComponentsToCreate(
 			componentsToCreate = append(componentsToCreate, newComponent)
 		}
 	}
-	return componentsToCreate, nil
+	return componentsToCreate
 }
 
 // listComponentsToModify provides a slice of components that should be modified on the remote
@@ -84,10 +84,7 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 	}
 
 	toDelete := listComponentsToDelete(configComponentMap, statuspageComponentMap)
-	toCreate, err := listComponentsToCreate(configComponentMap, statuspageComponentMap)
-	if err != nil {
-		return err
-	}
+	toCreate := listComponentsToCreate(configComponentMap, statuspageComponentMap)
 	toModify, err := listComponentsToModify(configComponentMap, statuspageComponentMap)
 	if err != nil {
 		return err
@@ -95,7 +92,7 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 
 	for _, component := range toDelete {
 		shared.LogLn(config, fmt.Sprintf("deleting %s component from statuspage", component.Name),
-			fmt.Sprintf("Deleting: %+v", component))
+			fmt.Sprintf(" - deleting: %+v", component))
 		err := statuspage.DeleteComponent(client, config.Statuspage.PageID, component.ID)
 		if err != nil {
 			return err
@@ -103,7 +100,7 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 	}
 	for _, component := range toCreate {
 		shared.LogLn(config, fmt.Sprintf("creating %s component on statuspage", component.Name),
-			fmt.Sprintf("New: %+v", component))
+			fmt.Sprintf(" - new: %+v", component))
 		_, err := statuspage.PostComponent(client, config.Statuspage.PageID, component)
 		if err != nil {
 			return err
@@ -111,9 +108,9 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 	}
 	for _, component := range toModify {
 		shared.LogLn(config, fmt.Sprintf("modifying %s component on statuspage", component.Name),
-			fmt.Sprintf("Config: %+v", configComponentMap[component.Name]),
-			fmt.Sprintf("Original: %+v", statuspageComponentMap[component.Name]),
-			fmt.Sprintf("New: %+v", component))
+			fmt.Sprintf(" - config: %+v", configComponentMap[component.Name]),
+			fmt.Sprintf(" - remote: %+v", statuspageComponentMap[component.Name]),
+			fmt.Sprintf(" - modified: %+v", component))
 		_, err := statuspage.PatchComponent(client, config.Statuspage.PageID, component.ID, component)
 		if err != nil {
 			return err

@@ -41,10 +41,10 @@ type Config struct {
 		// NOTE: May be set via REVERE_STATUSPAGE_APIKEY in environment
 		ApiKey string `validate:"required"`
 		// ID of the particular page to interact with
-		PageID     string `validate:"required"`
-		ApiRoot    string // default: "https://api.statuspage.io/v1"
-		Components []Component
-		Groups     []ComponentGroup
+		PageID     string           `validate:"required"`
+		ApiRoot    string           // default: "https://api.statuspage.io/v1"
+		Components []Component      `validate:"unique=Name,dive"`
+		Groups     []ComponentGroup `validate:"unique=Name,dive"`
 	}
 }
 
@@ -66,8 +66,8 @@ type ComponentGroup struct {
 	// Unique but user-readable group name
 	Name        string `validate:"required"`
 	Description string
-	// Exact names of components to include in the group
-	ComponentNames []string `validate:"required"`
+	// Exact names of components to include in the group (components should never exist in more than one group)
+	ComponentNames []string `validate:"required,unique"`
 }
 
 // newDefaultConfig sets config defaults only as described above

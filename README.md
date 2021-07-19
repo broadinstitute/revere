@@ -1,5 +1,7 @@
 # Revere
 
+[![codecov](https://codecov.io/gh/broadinstitute/revere/branch/main/graph/badge.svg?token=RLKHCZDWat)](https://codecov.io/gh/broadinstitute/revere)
+
 Revere is a service communicating Terra's uptime and status to end-users
 (like a metaphorical [Paul Revere](https://en.wikipedia.org/wiki/Paul_Revere%27s_Midnight_Ride)).
 

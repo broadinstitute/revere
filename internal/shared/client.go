@@ -20,7 +20,7 @@ func CheckResponse(response *resty.Response, err error) error {
 	if err != nil {
 		return err
 	} else if response.StatusCode() < 200 || response.StatusCode() > 299 {
-		return fmt.Errorf("%d from %s, response: %s", response.StatusCode(), response.Request.URL, response.String())
+		return fmt.Errorf("%d from %s, headers: %v, response: %s", response.StatusCode(), response.Request.URL, response.Header(), response.String())
 	} else {
 		return nil
 	}

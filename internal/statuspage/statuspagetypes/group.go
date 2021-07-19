@@ -43,10 +43,11 @@ func MergeConfigGroupToApi(configGroup configuration.ComponentGroup, apiGroup *G
 // This is necessary because the request structure is notably different from that
 // received as a response.
 // NOTE: As of 7/6/2021, the documentation for the request payload is wrong!
+// https://developer.statuspage.io/#operation/postPagesPageIdComponentGroups
 // The docs say that the description field should only occur on the outer object,
 // and while providing it there does not error, it appears to be a no-op. No docs
 // mention that the field can exist on the interior ComponentGroup object, but
-// doing so doesn't error and correctly sets the fields.
+// doing so doesn't error and, in fact, correctly sets the field on the remote.
 // I'm leaving the field in both places, to hopefully be forwards/backwards
 // compatible with whatever Atlassian does to fix this inconsistency. If they
 // make one field start to error, we'd find out about it on app startup, not runtime.
