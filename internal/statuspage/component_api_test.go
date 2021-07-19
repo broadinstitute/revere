@@ -62,6 +62,7 @@ func TestDeleteComponent(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.ActivateNonDefault(tt.args.client.GetClient())
 			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{component.ID: *component})
+			// test for function returning an error
 			if err := DeleteComponent(tt.args.client, tt.args.pageID, tt.args.componentID); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteComponent() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -113,10 +114,12 @@ func TestGetComponents(t *testing.T) {
 			})
 			got, err := GetComponents(tt.args.client, tt.args.pageID)
 			httpmock.DeactivateAndReset()
+			// test for function returning an error
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetComponents() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			// test for function mutating components
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetComponents() got = %v, want %v", got, tt.want)
 			}
@@ -180,10 +183,12 @@ func TestPatchComponent(t *testing.T) {
 			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{baseComponent.ID: *baseComponent})
 			got, err := PatchComponent(tt.args.client, tt.args.pageID, tt.args.componentID, tt.args.component)
 			httpmock.DeactivateAndReset()
+			// test for function returning an error
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PatchComponent() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			// test for function mutating components
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PatchComponent() got = %v, want %v", got, tt.want)
 			}
@@ -231,10 +236,12 @@ func TestPostComponent(t *testing.T) {
 			statuspagemocks.ConfigureComponentMock(config, componentMap)
 			got, err := PostComponent(tt.args.client, tt.args.pageID, tt.args.component)
 			httpmock.DeactivateAndReset()
+			// test for function returning an error
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PostComponent() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			// test for function mutating components
 			for id, component := range componentMap {
 				// One component, but we lack some info on it
 				tt.want.ID = id

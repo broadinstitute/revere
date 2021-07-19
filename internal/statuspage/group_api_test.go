@@ -46,6 +46,7 @@ func TestDeleteGroup(t *testing.T) {
 			statuspagemocks.ConfigureGroupMock(config, map[string]string{}, map[string]statuspagetypes.Group{
 				group.ID: *group,
 			})
+			// test for function returning an error
 			if err := DeleteGroup(tt.args.client, tt.args.pageID, tt.args.groupID); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteGroup() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -93,10 +94,12 @@ func TestGetGroups(t *testing.T) {
 			})
 			got, err := GetGroups(tt.args.client, tt.args.pageID)
 			httpmock.DeactivateAndReset()
+			// test for function returning an error
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetGroups() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			// test for function mutating groups
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetGroups() got = %v, want %v", got, tt.want)
 			}
@@ -165,10 +168,12 @@ func TestPatchGroup(t *testing.T) {
 			})
 			got, err := PatchGroup(tt.args.client, tt.args.pageID, tt.args.groupID, tt.args.group)
 			httpmock.DeactivateAndReset()
+			// test for function returning an error
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PatchGroup() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			// test for function mutating groups
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PatchGroup() got = %v, want %v", got, tt.want)
 			}
@@ -216,10 +221,12 @@ func TestPostGroup(t *testing.T) {
 			statuspagemocks.ConfigureGroupMock(config, map[string]string{}, groupMap)
 			got, err := PostGroup(tt.args.client, tt.args.pageID, tt.args.group)
 			httpmock.DeactivateAndReset()
+			// test for function returning an error
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PostGroup() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			// test for function mutating groups
 			for id, group := range groupMap {
 				// One group, but we lack some info on it
 				tt.want.ID = id
