@@ -13,7 +13,7 @@ on:
       - 'README.md'
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: checkout code
         uses: actions/checkout@v2
