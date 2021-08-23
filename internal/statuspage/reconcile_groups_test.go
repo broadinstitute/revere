@@ -1,8 +1,8 @@
-package actions
+package statuspage
 
 import (
 	"github.com/broadinstitute/revere/internal/configuration"
-	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspageapi"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
@@ -59,7 +59,7 @@ func TestReconcileGroups(t *testing.T) {
 			},
 		},
 	}
-	client := statuspage.Client(&config)
+	client := statuspageapi.Client(&config)
 	tests := []struct {
 		name    string
 		args    args
@@ -300,7 +300,7 @@ func Test_makeComponentMapping(t *testing.T) {
 		{
 			name: "Inverts server 'map'",
 			args: args{
-				client: statuspage.Client(&config),
+				client: statuspageapi.Client(&config),
 				pageID: config.Statuspage.PageID,
 			},
 			seed: map[string]string{
@@ -315,7 +315,7 @@ func Test_makeComponentMapping(t *testing.T) {
 		{
 			name: "Squashes same name components stably",
 			args: args{
-				client: statuspage.Client(&config),
+				client: statuspageapi.Client(&config),
 				pageID: config.Statuspage.PageID,
 			},
 			seed: map[string]string{
@@ -361,7 +361,7 @@ func Test_makeStatuspageGroupMapping(t *testing.T) {
 		{
 			name: "Inverts the server 'map'",
 			args: args{
-				client: statuspage.Client(&config),
+				client: statuspageapi.Client(&config),
 				pageID: config.Statuspage.PageID,
 			},
 			seed: map[string]statuspagetypes.Group{
@@ -376,7 +376,7 @@ func Test_makeStatuspageGroupMapping(t *testing.T) {
 		{
 			name: "Squashes same name groups stably",
 			args: args{
-				client: statuspage.Client(&config),
+				client: statuspageapi.Client(&config),
 				pageID: config.Statuspage.PageID,
 			},
 			seed: map[string]statuspagetypes.Group{

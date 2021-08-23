@@ -1,10 +1,10 @@
-package actions
+package statuspage
 
 import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
 	"github.com/broadinstitute/revere/internal/shared"
-	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspageapi"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
@@ -17,7 +17,7 @@ import (
 // This behavior exists just to stabilize handling of the "garbage in, garbage out" multiple-
 // components-with-same-name case.
 func makeComponentMapping(client *resty.Client, pageID string) (map[string]string, error) {
-	statuspageComponents, err := statuspage.GetComponents(client, pageID)
+	statuspageComponents, err := statuspageapi.GetComponents(client, pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func makeComponentMapping(client *resty.Client, pageID string) (map[string]strin
 // This behavior exists just to stabilize handling of the "garbage in, garbage out" multiple-
 // groups-with-same-name case.
 func makeStatuspageGroupMapping(client *resty.Client, pageID string) (map[string]statuspagetypes.Group, error) {
-	statuspageGroups, err := statuspage.GetGroups(client, pageID)
+	statuspageGroups, err := statuspageapi.GetGroups(client, pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func ReconcileGroups(config *configuration.Config, client *resty.Client) error {
 	for _, group := range toDelete {
 		shared.LogLn(config, fmt.Sprintf("deleting %s group from statuspage", group.Name),
 			fmt.Sprintf(" - deleting: %+v", group))
-		err := statuspage.DeleteGroup(client, config.Statuspage.PageID, group.ID)
+		err := statuspageapi.DeleteGroup(client, config.Statuspage.PageID, group.ID)
 		if err != nil {
 			return err
 		}
@@ -144,7 +144,7 @@ func ReconcileGroups(config *configuration.Config, client *resty.Client) error {
 	for _, group := range toCreate {
 		shared.LogLn(config, fmt.Sprintf("creating %s group on statuspage", group.Name),
 			fmt.Sprintf(" - new: %+v", group))
-		_, err := statuspage.PostGroup(client, config.Statuspage.PageID, group)
+		_, err := statuspageapi.PostGroup(client, config.Statuspage.PageID, group)
 		if err != nil {
 			return err
 		}
@@ -154,7 +154,7 @@ func ReconcileGroups(config *configuration.Config, client *resty.Client) error {
 			fmt.Sprintf(" - config: %+v", configGroupNameToGroup[group.Name]),
 			fmt.Sprintf(" - remote: %+v", statuspageGroupNameToGroup[group.Name]),
 			fmt.Sprintf(" - modified: %+v", group))
-		_, err := statuspage.PatchGroup(client, config.Statuspage.PageID, group.ID, group)
+		_, err := statuspageapi.PatchGroup(client, config.Statuspage.PageID, group.ID, group)
 		if err != nil {
 			return err
 		}

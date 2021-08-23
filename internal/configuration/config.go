@@ -46,6 +46,13 @@ type Config struct {
 		Components []Component      `validate:"unique=Name,dive"`
 		Groups     []ComponentGroup `validate:"unique=Name,dive"`
 	}
+
+	Pubsub struct {
+		// Non-numeric ID of the GCP project containing the subscription
+		ProjectID string `validate:"required"`
+		// ID of the Cloud Pub/Sub subscription to use to pull messages
+		SubscriptionID string `validate:"required"`
+	}
 }
 
 // Component configuration--note that leaving any of the below unfilled will use Go's "zero" value (false/empty)

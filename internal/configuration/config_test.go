@@ -25,6 +25,8 @@ func TestAssembleConfig(t *testing.T) {
 			configureViper: func(v *viper.Viper) {
 				v.Set("Statuspage.ApiKey", "foo")
 				v.Set("Statuspage.PageID", "bar")
+				v.Set("Pubsub.ProjectID", "test-project")
+				v.Set("Pubsub.SubscriptionID", "test-subscription")
 			},
 			want: &Config{
 				Verbose: false,
@@ -46,6 +48,10 @@ func TestAssembleConfig(t *testing.T) {
 					PageID:  "bar",
 					ApiRoot: "https://api.statuspage.io/v1",
 				},
+				Pubsub: struct {
+					ProjectID      string `validate:"required"`
+					SubscriptionID string `validate:"required"`
+				}{ProjectID: "test-project", SubscriptionID: "test-subscription"},
 			},
 		},
 	}
