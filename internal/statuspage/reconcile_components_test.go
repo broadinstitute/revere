@@ -1,8 +1,8 @@
-package actions
+package statuspage
 
 import (
 	"github.com/broadinstitute/revere/internal/configuration"
-	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspageapi"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
@@ -37,7 +37,7 @@ func TestReconcileComponents(t *testing.T) {
 			},
 		},
 	}
-	client := statuspage.Client(&config)
+	client := statuspageapi.Client(&config)
 	tests := []struct {
 		name string
 		args args

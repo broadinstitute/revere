@@ -1,4 +1,4 @@
-package statuspage
+package statuspageapi
 
 import (
 	"github.com/broadinstitute/revere/internal/configuration"

@@ -11,14 +11,25 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "revere",
-	Short: "Interact with Terra's production Statuspage",
-	Long: `Interact with Terra's production Statuspage.
+	Short: "Communicate Terra's production status and uptime",
+	Long: `Bridges input events about Terra components and output communication
+channels to notify the public about Terra's status and uptime.
+
+Current input event sources:
+	- Google Cloud Monitoring via Google Cloud Pub/Sub
+Current output communication channels:
+	- Atlassian Statuspage.io
 
 Requires a configuration file via --configuration, ./revere.yaml,
 or /etc/revere/revere.yaml.
 
-To configure Statuspage.io based on the configuration file:
-	$ revere prepare`,
+To prepare input and output services for Revere's operation:
+	$ revere prepare
+
+To run Revere continuously:
+	$ revere serve
+
+See subcommand help for more information.`,
 }
 
 // Execute adds all child commands to the root command, only necessary for rootCmd

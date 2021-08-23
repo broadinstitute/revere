@@ -1,10 +1,10 @@
-package actions
+package statuspage
 
 import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/configuration"
 	"github.com/broadinstitute/revere/internal/shared"
-	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspageapi"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
@@ -70,7 +70,7 @@ func listComponentsToModify(
 // It creates statuspage.Component slices for deletion, creation, and modification, and then hands that data
 // to the correct functions in statuspage/component_api.go
 func ReconcileComponents(config *configuration.Config, client *resty.Client) error {
-	statuspageComponents, err := statuspage.GetComponents(client, config.Statuspage.PageID)
+	statuspageComponents, err := statuspageapi.GetComponents(client, config.Statuspage.PageID)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 	for _, component := range toDelete {
 		shared.LogLn(config, fmt.Sprintf("deleting %s component from statuspage", component.Name),
 			fmt.Sprintf(" - deleting: %+v", component))
-		err := statuspage.DeleteComponent(client, config.Statuspage.PageID, component.ID)
+		err := statuspageapi.DeleteComponent(client, config.Statuspage.PageID, component.ID)
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 	for _, component := range toCreate {
 		shared.LogLn(config, fmt.Sprintf("creating %s component on statuspage", component.Name),
 			fmt.Sprintf(" - new: %+v", component))
-		_, err := statuspage.PostComponent(client, config.Statuspage.PageID, component)
+		_, err := statuspageapi.PostComponent(client, config.Statuspage.PageID, component)
 		if err != nil {
 			return err
 		}
@@ -111,7 +111,7 @@ func ReconcileComponents(config *configuration.Config, client *resty.Client) err
 			fmt.Sprintf(" - config: %+v", configComponentMap[component.Name]),
 			fmt.Sprintf(" - remote: %+v", statuspageComponentMap[component.Name]),
 			fmt.Sprintf(" - modified: %+v", component))
-		_, err := statuspage.PatchComponent(client, config.Statuspage.PageID, component.ID, component)
+		_, err := statuspageapi.PatchComponent(client, config.Statuspage.PageID, component.ID, component)
 		if err != nil {
 			return err
 		}
