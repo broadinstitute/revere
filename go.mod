@@ -4,6 +4,7 @@ go 1.16
 
 // List direct dependencies (here, not inline, so as to not confuse IDEs):
 // Cobra is a CLI framework facilitating help text, commands, and error checking
+// Gin is the server library
 // Httpmock works with Resty to mock APIs
 // Mapstructure translates structures based on field names, helpful for API usage
 // Pubsub connects with Google Pub/Sub for input events
@@ -14,7 +15,7 @@ require (
 	cloud.google.com/go v0.93.3 // indirect
 	cloud.google.com/go/kms v0.1.0 // indirect
 	cloud.google.com/go/pubsub v1.15.0
-	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/gin-gonic/gin v1.7.4
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/jarcoal/httpmock v1.0.8
