@@ -9,7 +9,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Get Revere's recorded build version",
 	Long: `Get Revere's internal BuildVersion, usually set via LDFlags during
-compilation.'`,
+compilation.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		println()
 		println("version:")
