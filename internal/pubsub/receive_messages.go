@@ -16,11 +16,9 @@ func receiveOnce(config *configuration.Config, msg *pubsub.Message) {
 
 // ReceiveMessages should never terminate, it continually pulls messages from
 // the subscription
-func ReceiveMessages(config *configuration.Config, client *pubsub.Client) error {
+func ReceiveMessages(config *configuration.Config, client *pubsub.Client, ctx context.Context) error {
 	subscription := client.Subscription(config.Pubsub.SubscriptionID)
-	cctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	return subscription.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
+	return subscription.Receive(ctx, func(cctx context.Context, msg *pubsub.Message) {
 		receiveOnce(config, msg)
 	})
 }
