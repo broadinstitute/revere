@@ -80,7 +80,7 @@ func Serve(*cobra.Command, []string) {
 
 	// Block waiting for SIGINT/SIGTERM
 	// We can't capture SIGKILL so no need to include
-	shutdownChannel := make(chan os.Signal)
+	shutdownChannel := make(chan os.Signal, 1)
 	signal.Notify(shutdownChannel, syscall.SIGINT, syscall.SIGTERM)
 	<-shutdownChannel
 
