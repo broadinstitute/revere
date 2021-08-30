@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -52,6 +53,10 @@ func TestAssembleConfig(t *testing.T) {
 					ProjectID      string `validate:"required"`
 					SubscriptionID string `validate:"required"`
 				}{ProjectID: "test-project", SubscriptionID: "test-subscription"},
+				Api: struct {
+					Port  int
+					Debug bool
+				}{Port: 8080, Debug: false},
 			},
 		},
 	}
@@ -96,6 +101,10 @@ func Test_newDefaultConfig(t *testing.T) {
 				}{
 					ApiRoot: "https://api.statuspage.io/v1",
 				},
+				Api: struct {
+					Port  int
+					Debug bool
+				}{Port: 8080},
 			},
 		},
 	}
@@ -109,35 +118,57 @@ func Test_newDefaultConfig(t *testing.T) {
 }
 
 func Test_readEnvironmentVariables(t *testing.T) {
-	envVal := "foobar"
 	type args struct {
 		config *Config
 	}
 	tests := []struct {
 		name         string
 		args         args
+		envVal       string
 		envKey       string
 		configAccess func(config *Config) string
+		wantErr      bool
 	}{
 		{
-			name:   "Reads Statuspage API Key",
+			name:   "Reads Statuspage API key",
 			args:   args{config: &Config{}},
+			envVal: "foobar",
 			envKey: "REVERE_STATUSPAGE_APIKEY",
 			configAccess: func(config *Config) string {
 				return config.Statuspage.ApiKey
 			},
 		},
+		{
+			name:   "Reads API port",
+			args:   args{config: &Config{}},
+			envVal: "123",
+			envKey: "REVERE_API_PORT",
+			configAccess: func(config *Config) string {
+				return strconv.Itoa(config.Api.Port)
+			},
+		},
+		{
+			name:   "Errors on bad port",
+			args:   args{config: &Config{}},
+			envVal: "foobar",
+			envKey: "REVERE_API_PORT",
+			configAccess: func(config *Config) string {
+				return strconv.Itoa(config.Api.Port)
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			existingVal, present := os.LookupEnv(tt.envKey)
-			err := os.Setenv(tt.envKey, envVal)
-			if err != nil {
+			if err := os.Setenv(tt.envKey, tt.envVal); err != nil {
 				t.Errorf("env error setting %v", err)
 			}
-			readEnvironmentVariables(tt.args.config)
-			if got := tt.configAccess(tt.args.config); got != envVal {
-				t.Errorf("readEnvironmentVariables() got %s for %s, want %s", got, tt.envKey, envVal)
+			if err := readEnvironmentVariables(tt.args.config); (err != nil) != tt.wantErr {
+				t.Errorf("readEnvironmentVariables had err %s, wantErr %t", err, tt.wantErr)
+			}
+			if got := tt.configAccess(tt.args.config); !tt.wantErr && (got != tt.envVal) {
+				t.Errorf("readEnvironmentVariables() got %s for %s, want %s", got, tt.envKey, tt.envVal)
 			}
 			if present {
 				err := os.Setenv(tt.envKey, existingVal)
