@@ -30,6 +30,25 @@ type routeTest = struct {
 	wantJson  interface{}
 }
 
+// Run an individual route test from within a larger test context `t`
+func runRouteTest(t *testing.T, rt routeTest) {
+	renderedWantJson, err := json.Marshal(rt.wantJson)
+	if err != nil {
+		t.Errorf("wantJson %v could not be rendered: %v", rt.wantJson, err)
+		return
+	}
+	router := NewRouter(&testConfig)
+	got := httptest.NewRecorder()
+	req, _ := http.NewRequest(rt.reqMethod, rt.reqUrl, rt.reqBody)
+	router.ServeHTTP(got, req)
+	if got.Code != rt.wantCode {
+		t.Errorf("%s %s -> code %d, want %d", rt.reqMethod, rt.reqUrl, got.Code, rt.wantCode)
+	}
+	if got.Body.String() != string(renderedWantJson) {
+		t.Errorf("%s %s -> body %v, want %v", rt.reqMethod, rt.reqUrl, got.Body.String(), string(renderedWantJson))
+	}
+}
+
 func Test_getStatus(t *testing.T) {
 	tests := []routeTest{
 		{
@@ -49,23 +68,9 @@ func Test_getStatus(t *testing.T) {
 			wantJson:  gin.H{"status": "ok"},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			renderedWantJson, err := json.Marshal(tt.wantJson)
-			if err != nil {
-				t.Errorf("wantJson %v could not be rendered: %v", tt.wantJson, err)
-				return
-			}
-			router := NewRouter(&testConfig)
-			got := httptest.NewRecorder()
-			req, _ := http.NewRequest(tt.reqMethod, tt.reqUrl, tt.reqBody)
-			router.ServeHTTP(got, req)
-			if got.Code != tt.wantCode {
-				t.Errorf("%s %s -> code %d, want %d", tt.reqMethod, tt.reqUrl, got.Code, tt.wantCode)
-			}
-			if got.Body.String() != string(renderedWantJson) {
-				t.Errorf("%s %s -> body %v, want %v", tt.reqMethod, tt.reqUrl, got.Body.String(), string(renderedWantJson))
-			}
+	for _, rt := range tests {
+		t.Run(rt.name, func(t *testing.T) {
+			runRouteTest(t, rt)
 		})
 	}
 }
@@ -89,23 +94,9 @@ func Test_getVersion(t *testing.T) {
 			wantJson:  gin.H{"version": version.BuildVersion},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			renderedWantJson, err := json.Marshal(tt.wantJson)
-			if err != nil {
-				t.Errorf("wantJson %v could not be rendered: %v", tt.wantJson, err)
-				return
-			}
-			router := NewRouter(&testConfig)
-			got := httptest.NewRecorder()
-			req, _ := http.NewRequest(tt.reqMethod, tt.reqUrl, tt.reqBody)
-			router.ServeHTTP(got, req)
-			if got.Code != tt.wantCode {
-				t.Errorf("%s %s -> code %d, want %d", tt.reqMethod, tt.reqUrl, got.Code, tt.wantCode)
-			}
-			if got.Body.String() != string(renderedWantJson) {
-				t.Errorf("%s %s -> body %v, want %v", tt.reqMethod, tt.reqUrl, got.Body.String(), string(renderedWantJson))
-			}
+	for _, rt := range tests {
+		t.Run(rt.name, func(t *testing.T) {
+			runRouteTest(t, rt)
 		})
 	}
 }
