@@ -59,7 +59,8 @@ func initConfig() {
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			cobra.CheckErr(fmt.Errorf("not using a configuration file! %w", err))
+			// Don't error out since "version" command requires no config file
+			fmt.Printf("not using a configuration file! %v\n", err)
 		} else {
 			cobra.CheckErr(err)
 		}
