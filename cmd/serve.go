@@ -11,10 +11,10 @@ import (
 	"github.com/broadinstitute/revere/internal/shared"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/sync/errgroup"
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 )
@@ -45,7 +45,7 @@ func Serve(*cobra.Command, []string) {
 
 	routines := []struct {
 		runForever   func()
-		uponShutdown func()
+		uponShutdown func() error
 	}{
 		{
 			runForever: func() {
@@ -53,8 +53,9 @@ func Serve(*cobra.Command, []string) {
 				err := pubsub.ReceiveMessages(config, pubsubClient, pubsubCtx)
 				cobra.CheckErr(err)
 			},
-			uponShutdown: func() {
+			uponShutdown: func() error {
 				cancelPubsub()
+				return nil
 			},
 		},
 		{
@@ -64,11 +65,11 @@ func Serve(*cobra.Command, []string) {
 					cobra.CheckErr(err)
 				}
 			},
-			uponShutdown: func() {
+			uponShutdown: func() error {
 				apiShutdownCtx, apiShutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer apiShutdownCancel()
 				err := apiServer.Shutdown(apiShutdownCtx)
-				cobra.CheckErr(err)
+				return err
 			},
 		},
 	}
@@ -84,20 +85,14 @@ func Serve(*cobra.Command, []string) {
 	signal.Notify(shutdownChannel, syscall.SIGINT, syscall.SIGTERM)
 	<-shutdownChannel
 
-	// Run shutdown routines "forever", use waitgroup to synchronize
-	// (
+	// Run shutdown routines "forever", use errgroup to synchronize
+	// Errgroup collects errors instead of exiting immediately
 	shared.LogLn(config, "shutting down...")
-	var shutdownWaitGroup sync.WaitGroup
+	shutdownErrorGroup := new(errgroup.Group)
 	for _, routine := range routines {
-		shutdownWaitGroup.Add(1)
-		// Intermediate variable to lock in routine referenced in func
-		r := routine
-		go func() {
-			defer shutdownWaitGroup.Done()
-			r.uponShutdown()
-		}()
+		shutdownErrorGroup.Go(routine.uponShutdown)
 	}
-	shutdownWaitGroup.Wait()
+	cobra.CheckErr(shutdownErrorGroup.Wait())
 }
 
 func init() {
