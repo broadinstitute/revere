@@ -61,6 +61,8 @@ type Config struct {
 		Port int // default: 8080
 		// Print debugging information from the server library
 		Debug bool
+		// Forcibly silence the request log
+		Silent bool
 	}
 }
 

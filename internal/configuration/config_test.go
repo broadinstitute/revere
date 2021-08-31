@@ -54,9 +54,10 @@ func TestAssembleConfig(t *testing.T) {
 					SubscriptionID string `validate:"required"`
 				}{ProjectID: "test-project", SubscriptionID: "test-subscription"},
 				Api: struct {
-					Port  int
-					Debug bool
-				}{Port: 8080, Debug: false},
+					Port   int
+					Debug  bool
+					Silent bool
+				}{Port: 8080, Debug: false, Silent: false},
 			},
 		},
 	}
@@ -102,8 +103,9 @@ func Test_newDefaultConfig(t *testing.T) {
 					ApiRoot: "https://api.statuspage.io/v1",
 				},
 				Api: struct {
-					Port  int
-					Debug bool
+					Port   int
+					Debug  bool
+					Silent bool
 				}{Port: 8080},
 			},
 		},

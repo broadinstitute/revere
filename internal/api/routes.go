@@ -22,7 +22,11 @@ func NewRouter(config *configuration.Config) *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
+	if !config.Api.Silent {
+		router.Use(gin.Logger())
+	}
 
 	api := router.Group("/api/v1")
 
