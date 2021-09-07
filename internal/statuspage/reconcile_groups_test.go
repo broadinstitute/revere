@@ -6,6 +6,7 @@ import (
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
+	"github.com/google/go-cmp/cmp"
 	"github.com/jarcoal/httpmock"
 	"reflect"
 	"testing"
@@ -104,8 +105,8 @@ func TestReconcileGroups(t *testing.T) {
 				t.Errorf("ReconcileGroups() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(tt.start, tt.end) {
-				t.Errorf("ReconcileGroups() mutated %v, want %v", tt.start, tt.end)
+			if diff := cmp.Diff(tt.end, tt.start); diff != "" {
+				t.Errorf("ReconcileGroups() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -167,8 +168,8 @@ func Test_listGroupsToCreate(t *testing.T) {
 				t.Errorf("listGroupsToCreate() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("listGroupsToCreate() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("listGroupsToCreate() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -276,8 +277,8 @@ func Test_listGroupsToModify(t *testing.T) {
 				t.Errorf("listGroupsToModify() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("listGroupsToModify() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("listGroupsToModify() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -337,8 +338,8 @@ func Test_makeComponentMapping(t *testing.T) {
 				t.Errorf("makeComponentMapping() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("makeComponentMapping() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("makeComponentMapping() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -398,8 +399,8 @@ func Test_makeStatuspageGroupMapping(t *testing.T) {
 				t.Errorf("makeStatuspageGroupMapping() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("makeStatuspageGroupMapping() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("makeStatuspageGroupMapping() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

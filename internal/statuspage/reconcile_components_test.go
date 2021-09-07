@@ -6,8 +6,8 @@ import (
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
+	"github.com/google/go-cmp/cmp"
 	"github.com/jarcoal/httpmock"
-	"reflect"
 	"sort"
 	"testing"
 )
@@ -74,8 +74,8 @@ func TestReconcileComponents(t *testing.T) {
 				t.Errorf("ReconcileComponents() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(tt.start, tt.end) {
-				t.Errorf("ReconcileComponents() mutated %v, want %v", tt.start, tt.end)
+			if diff := cmp.Diff(tt.end, tt.start); diff != "" {
+				t.Errorf("ReconcileComponents() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -122,8 +122,8 @@ func Test_listComponentsToCreate(t *testing.T) {
 			got := listComponentsToCreate(tt.args.configComponentMap, tt.args.remoteComponentMap)
 			sort.Sort(statuspagetypes.ComponentSort(got))
 			sort.Sort(statuspagetypes.ComponentSort(tt.want))
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("listComponentsToCreate() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("listComponentsToCreate() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -170,8 +170,8 @@ func Test_listComponentsToDelete(t *testing.T) {
 			got := listComponentsToDelete(tt.args.configComponentMap, tt.args.remoteComponentMap)
 			sort.Sort(statuspagetypes.ComponentSort(got))
 			sort.Sort(statuspagetypes.ComponentSort(tt.want))
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("listComponentsToDelete() = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("listComponentsToDelete() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -236,8 +236,8 @@ func Test_listComponentsToModify(t *testing.T) {
 			}
 			sort.Sort(statuspagetypes.ComponentSort(got))
 			sort.Sort(statuspagetypes.ComponentSort(tt.want))
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("listComponentsToModify() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("listComponentsToModify() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

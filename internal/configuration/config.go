@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/go-playground/validator.v9"
 	"os"
+	"strconv"
 
 	"github.com/spf13/viper"
 )
@@ -53,6 +54,16 @@ type Config struct {
 		// ID of the Cloud Pub/Sub subscription to use to pull messages
 		SubscriptionID string `validate:"required"`
 	}
+
+	Api struct {
+		// Port to host Revere's web server on
+		// NOTE: May be set via REVERE_API_PORT in environment
+		Port int // default: 8080
+		// Print debugging information from the server library
+		Debug bool
+		// Forcibly silence the request log
+		Silent bool
+	}
 }
 
 // Component configuration--note that leaving any of the below unfilled will use Go's "zero" value (false/empty)
@@ -83,29 +94,38 @@ func newDefaultConfig() *Config {
 	config.Client.Redirects = 3
 	config.Client.Retries = 3
 	config.Statuspage.ApiRoot = "https://api.statuspage.io/v1"
+	config.Api.Port = 8080
 	return &config
 }
 
 // readEnvironmentVariables sets config values from the environment specifically only as described above
-func readEnvironmentVariables(config *Config) {
+func readEnvironmentVariables(config *Config) error {
 	apiKey, present := os.LookupEnv("REVERE_STATUSPAGE_APIKEY")
 	if present {
 		config.Statuspage.ApiKey = apiKey
 	}
+	stringPort, present := os.LookupEnv("REVERE_API_PORT")
+	if present {
+		intPort, err := strconv.Atoi(stringPort)
+		if err != nil {
+			return err
+		}
+		config.Api.Port = intPort
+	}
+	return nil
 }
 
 // AssembleConfig creates a default config, reads values from Viper's config file,
 // reads applies overrides from the environment, and validates the config before returning
 func AssembleConfig(v *viper.Viper) (*Config, error) {
 	config := newDefaultConfig()
-	err := v.Unmarshal(config)
-	if err != nil {
+	if err := v.Unmarshal(config); err != nil {
 		return nil, fmt.Errorf("error unmarshalling Viper to configuration struct: %w", err)
 	}
-	readEnvironmentVariables(config)
-	validate := validator.New()
-	err = validate.Struct(config)
-	if err != nil {
+	if err := readEnvironmentVariables(config); err != nil {
+		return nil, fmt.Errorf("error reading environment variables: %w", err)
+	}
+	if err := validator.New().Struct(config); err != nil {
 		return nil, fmt.Errorf("errors validating configuration: %w", err)
 	}
 	return config, nil

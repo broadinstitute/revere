@@ -2,6 +2,7 @@ package statuspagetypes
 
 import (
 	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"testing"
 )
@@ -52,8 +53,8 @@ func TestComponentConfigToApi(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			MergeConfigComponentToApi(tt.args.configComponent, tt.args.apiComponent)
-			if !reflect.DeepEqual(tt.args.apiComponent, tt.want) {
-				t.Errorf("GetComponents() mutated = %v, want %v", tt.args.apiComponent, tt.want)
+			if diff := cmp.Diff(tt.want, tt.args.apiComponent); diff != "" {
+				t.Errorf("GetComponents() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
