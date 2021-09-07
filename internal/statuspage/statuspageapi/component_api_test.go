@@ -5,8 +5,8 @@ import (
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
+	"github.com/google/go-cmp/cmp"
 	"github.com/jarcoal/httpmock"
-	"reflect"
 	"testing"
 )
 
@@ -120,8 +120,8 @@ func TestGetComponents(t *testing.T) {
 				return
 			}
 			// test for function mutating components
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetComponents() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("GetComponents() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -189,8 +189,8 @@ func TestPatchComponent(t *testing.T) {
 				return
 			}
 			// test for function mutating components
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("PatchComponent() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("PatchComponent() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -246,8 +246,8 @@ func TestPostComponent(t *testing.T) {
 				// One component, but we lack some info on it
 				tt.want.ID = id
 				tt.want.PageID = component.PageID
-				if !reflect.DeepEqual(got, tt.want) {
-					t.Errorf("PostComponent() got = %v, want %v", got, tt.want)
+				if diff := cmp.Diff(tt.want, got); diff != "" {
+					t.Errorf("PostComponent() mismatch (-want +got):\n%s", diff)
 				}
 			}
 		})

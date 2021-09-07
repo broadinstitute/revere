@@ -5,6 +5,7 @@ import (
 	"github.com/broadinstitute/revere/internal/configuration"
 	"github.com/broadinstitute/revere/internal/version"
 	"github.com/gin-gonic/gin"
+	"github.com/google/go-cmp/cmp"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -44,8 +45,8 @@ func runRouteTest(t *testing.T, rt routeTest) {
 	if got.Code != rt.wantCode {
 		t.Errorf("%s %s -> code %d, want %d", rt.reqMethod, rt.reqUrl, got.Code, rt.wantCode)
 	}
-	if got.Body.String() != string(renderedWantJson) {
-		t.Errorf("%s %s -> body %v, want %v", rt.reqMethod, rt.reqUrl, got.Body.String(), string(renderedWantJson))
+	if diff := cmp.Diff(string(renderedWantJson), got.Body.String()); diff != "" {
+		t.Errorf("%s %s mismatch (-want +got):\n%s", rt.reqMethod, rt.reqUrl, diff)
 	}
 }
 

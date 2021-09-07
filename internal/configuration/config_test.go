@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/viper"
 	"os"
 	"reflect"
@@ -70,8 +71,8 @@ func TestAssembleConfig(t *testing.T) {
 				t.Errorf("AssembleConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AssembleConfig() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("AssembleConfig() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

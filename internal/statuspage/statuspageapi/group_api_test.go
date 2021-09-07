@@ -4,8 +4,8 @@ import (
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagemocks"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspagetypes"
 	"github.com/go-resty/resty/v2"
+	"github.com/google/go-cmp/cmp"
 	"github.com/jarcoal/httpmock"
-	"reflect"
 	"testing"
 )
 
@@ -100,8 +100,8 @@ func TestGetGroups(t *testing.T) {
 				return
 			}
 			// test for function mutating groups
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetGroups() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("GetGroups() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -174,8 +174,8 @@ func TestPatchGroup(t *testing.T) {
 				return
 			}
 			// test for function mutating groups
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("PatchGroup() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("PatchGroup() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -231,8 +231,8 @@ func TestPostGroup(t *testing.T) {
 				// One group, but we lack some info on it
 				tt.want.ID = id
 				tt.want.PageID = group.PageID
-				if !reflect.DeepEqual(got, tt.want) {
-					t.Errorf("PostGroup() got = %v, want %v", got, tt.want)
+				if diff := cmp.Diff(tt.want, got); diff != "" {
+					t.Errorf("PostGroup() mismatch (-want +got):\n%s", diff)
 				}
 			}
 		})

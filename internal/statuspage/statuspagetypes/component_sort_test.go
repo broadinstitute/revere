@@ -1,7 +1,7 @@
 package statuspagetypes
 
 import (
-	"reflect"
+	"github.com/google/go-cmp/cmp"
 	"sort"
 	"testing"
 )
@@ -36,8 +36,8 @@ func TestComponentSort(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sort.Sort(ComponentSort(tt.given))
-			if !reflect.DeepEqual(tt.given, tt.want) {
-				t.Errorf("Sorted = %v, want %v", tt.given, tt.want)
+			if diff := cmp.Diff(tt.want, tt.given); diff != "" {
+				t.Errorf("Sorted mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

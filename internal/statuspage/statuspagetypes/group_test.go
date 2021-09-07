@@ -2,6 +2,7 @@ package statuspagetypes
 
 import (
 	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"testing"
 )
@@ -133,8 +134,8 @@ func TestMergeConfigGroupToApi(t *testing.T) {
 				t.Errorf("MergeConfigGroupToApi() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(tt.args.apiGroup, tt.want) {
-				t.Errorf("MergeConfigGroupToApi() mutated %v, want %v", tt.args.apiGroup, tt.want)
+			if diff := cmp.Diff(tt.want, tt.args.apiGroup); diff != "" {
+				t.Errorf("MergeConfigGroupToApi() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
