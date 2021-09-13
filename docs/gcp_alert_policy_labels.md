@@ -7,22 +7,11 @@ This avoids using inconsistent naming schemes or the added complexity of attempt
 
 Label keys and values are subject to [Google's format and content restrictions](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
 
-| Key | Meaning | Example Value |
-|:---:|:-------:|:-------:|
-| `revere-service-name` | "What is the 'short name' of the service?" | `buffer` |
-| `revere-service-environment` | "Where does this instance of the service operate?" | `prod` |
-| `revere-service-degradation` | "What is degraded when this alert policy triggers?" | `uptime` |
+| Key | Meaning | Schema | Example |
+|:---:|:-------:|:------:|:-------:|
+| `revere-service-name` | "What is the 'short name' of the service?" | Arbitrary string, read based on Revere's config file | `buffer` |
+| `revere-service-environment` | "Where does this instance of the service operate?" | Arbitrary string, read based on Revere's config file | `prod` |
+| `revere-alert-type` | "What does this alert firing mean" | One of `degraded-performance`, `partial-outage`, or `major-outage` | `major-outage` |
 
 The label values do not need to be unique: multiple alert policies can have the same labels to be understood the same way by Revere.
 
-### Failure Modes
-
-If Revere receives a Alert Policy incident notification and cannot find at least one of the above labels, it will attempt to parse the name of the Alert Policy to "fill in" whatever labels are missing.
-
-This mechanism operates like the following Go named-group RegEx: 
-
-```goregexp
-^(?P<name>[^-]+)-(?P<environment>[^-]+)-(?P<degredation>.+)$
-```
-
-For example, a name of `buffer-prod-uptime` has the same semantics in this failure mode as the labels given above.
