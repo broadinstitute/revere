@@ -2,8 +2,10 @@ package statuspagetypes
 
 import "fmt"
 
+// Status represents the various component states understood by Statuspage.io
 type Status int
 
+// https://golang.org/ref/spec#Iota, https://golang.org/ref/spec#Constant_declarations
 const (
 	Operational Status = iota
 	DegradedPerformance
