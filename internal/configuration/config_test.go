@@ -188,3 +188,76 @@ func Test_readEnvironmentVariables(t *testing.T) {
 		})
 	}
 }
+
+func Test_secondaryConfigValidation(t *testing.T) {
+	type args struct {
+		config *Config
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "allows correct mappings",
+			args: args{config: &Config{
+				Statuspage: struct {
+					ApiKey     string `validate:"required"`
+					PageID     string `validate:"required"`
+					ApiRoot    string
+					Components []Component      `validate:"unique=Name,dive"`
+					Groups     []ComponentGroup `validate:"unique=Name,dive"`
+				}{
+					Components: []Component{
+						{Name: "notebooks"},
+						{Name: "ui"},
+					},
+				},
+				ServiceToComponentMapping: []ServiceToComponentMapping{
+					{ServiceName: "leonardo", AffectsComponentsNamed: []string{"notebooks"}},
+					{ServiceName: "sam", AffectsComponentsNamed: []string{"notebooks", "ui"}},
+					{ServiceName: "sherlock"},
+				},
+			}},
+		},
+		{
+			name: "rejects bad mappings",
+			args: args{config: &Config{
+				Statuspage: struct {
+					ApiKey     string `validate:"required"`
+					PageID     string `validate:"required"`
+					ApiRoot    string
+					Components []Component      `validate:"unique=Name,dive"`
+					Groups     []ComponentGroup `validate:"unique=Name,dive"`
+				}{
+					Components: []Component{
+						{Name: "notebooks"},
+						{Name: "ui"},
+					},
+				},
+				ServiceToComponentMapping: []ServiceToComponentMapping{
+					{ServiceName: "leonardo", AffectsComponentsNamed: []string{"notebooks"}},
+					{ServiceName: "sam", AffectsComponentsNamed: []string{"notebooks", "ui"}},
+					{ServiceName: "sherlock", AffectsComponentsNamed: []string{"preview-environments"}},
+				},
+			}},
+			wantErr: true,
+		},
+		{
+			name: "rejects bad mappings where there's no components",
+			args: args{config: &Config{
+				ServiceToComponentMapping: []ServiceToComponentMapping{
+					{ServiceName: "leonardo", AffectsComponentsNamed: []string{"notebooks"}},
+				},
+			}},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := secondaryConfigValidation(tt.args.config); (err != nil) != tt.wantErr {
+				t.Errorf("secondaryConfigValidation() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
