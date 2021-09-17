@@ -24,6 +24,12 @@ func receiveOnce(config *configuration.Config, msg *pubsub.Message) {
 		return
 	}
 	fmt.Printf("Alert %+v from %s", labels, config.Pubsub.SubscriptionID)
+	for _, serviceMapping := range config.ServiceToComponentMapping {
+		if serviceMapping.ServiceName == labels.ServiceName &&
+			serviceMapping.EnvironmentName == labels.ServiceEnvironment {
+			fmt.Printf("Affects components %+v", serviceMapping.AffectsComponentsNamed)
+		}
+	}
 	msg.Ack()
 }
 
