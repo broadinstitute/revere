@@ -52,6 +52,3 @@ The configuration file's format is defined by [`internal/config.go`](https://git
 
 Do not manually tag commits. This repository has [Bumper](https://github.com/DataBiosphere/github-actions/tree/master/actions/bumper) enabled, Git tags will be created automatically on merge to `main`. 
 Patch version will be automatically bumped upon merge; including "`#minor`" or "`#major`" in the merge commit body will bump that instead.
-
-Configurations for GoLand/VSCode may (tentatively) be committed, transient components are part of the
-generated `.gitiginore`.
