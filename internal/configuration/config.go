@@ -66,7 +66,7 @@ type Config struct {
 	}
 
 	// Correlate developed services to user-facing components
-	ServiceToComponentMapping []ServiceToComponentMapping
+	ServiceToComponentMapping []ServiceToComponentMapping `validate:"dive"`
 }
 
 // Component configuration--note that leaving any of the below unfilled will use Go's "zero" value (false/empty)
@@ -95,7 +95,7 @@ type ComponentGroup struct {
 // to user-facing components ("Notebooks", "Terra UI")
 type ServiceToComponentMapping struct {
 	ServiceName            string   `validate:"required"`
-	EnvironmentName        string   `validate:"required"`
+	ServiceEnvironment     string   `validate:"required"`
 	AffectsComponentsNamed []string `validate:"unique"`
 }
 
