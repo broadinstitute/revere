@@ -23,7 +23,13 @@ func receiveOnce(config *configuration.Config, msg *pubsub.Message) {
 		shared.LogLn(config, "failed to parse labels", fmt.Sprintf("%+v", err))
 		return
 	}
-	fmt.Printf("Alert %+v from %s", labels, config.Pubsub.SubscriptionID)
+	fmt.Printf("Alert %+v from %s\n", labels, config.Pubsub.SubscriptionID)
+	for _, serviceMapping := range config.ServiceToComponentMapping {
+		if serviceMapping.ServiceName == labels.ServiceName &&
+			serviceMapping.ServiceEnvironment == labels.ServiceEnvironment {
+			fmt.Printf("Affects components %+v", serviceMapping.AffectsComponentsNamed)
+		}
+	}
 	msg.Ack()
 }
 

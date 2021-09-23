@@ -64,6 +64,9 @@ type Config struct {
 		// Forcibly silence the request log
 		Silent bool
 	}
+
+	// Correlate developed services to user-facing components
+	ServiceToComponentMapping []ServiceToComponentMapping `validate:"dive"`
 }
 
 // Component configuration--note that leaving any of the below unfilled will use Go's "zero" value (false/empty)
@@ -86,6 +89,14 @@ type ComponentGroup struct {
 	Description string
 	// Exact names of components to include in the group (components should never exist in more than one group)
 	ComponentNames []string `validate:"required,unique"`
+}
+
+// ServiceToComponentMapping correlates developed services ("Rawls", "Leonardo") in particular environments ("prod")
+// to user-facing components ("Notebooks", "Terra UI")
+type ServiceToComponentMapping struct {
+	ServiceName            string   `validate:"required"`
+	ServiceEnvironment     string   `validate:"required"`
+	AffectsComponentsNamed []string `validate:"unique"`
 }
 
 // newDefaultConfig sets config defaults only as described above
@@ -115,6 +126,24 @@ func readEnvironmentVariables(config *Config) error {
 	return nil
 }
 
+// secondaryConfigValidation performs logical validation that can't be captured by struct tags
+func secondaryConfigValidation(config *Config) error {
+	// Go compiler optimized to use map[string]struct{} like a Set (no alloc for values)
+	componentNames := make(map[string]struct{})
+	for _, component := range config.Statuspage.Components {
+		componentNames[component.Name] = struct{}{}
+	}
+	for _, serviceMapping := range config.ServiceToComponentMapping {
+		for _, componentName := range serviceMapping.AffectsComponentsNamed {
+			if _, present := componentNames[componentName]; !present {
+				return fmt.Errorf("mapping for service %s affects non-existent component %s",
+					serviceMapping.ServiceName, componentName)
+			}
+		}
+	}
+	return nil
+}
+
 // AssembleConfig creates a default config, reads values from Viper's config file,
 // reads applies overrides from the environment, and validates the config before returning
 func AssembleConfig(v *viper.Viper) (*Config, error) {
@@ -127,6 +156,9 @@ func AssembleConfig(v *viper.Viper) (*Config, error) {
 	}
 	if err := validator.New().Struct(config); err != nil {
 		return nil, fmt.Errorf("errors validating configuration: %w", err)
+	}
+	if err := secondaryConfigValidation(config); err != nil {
+		return nil, fmt.Errorf("errors during secondary configuration validation: %w", err)
 	}
 	return config, nil
 }

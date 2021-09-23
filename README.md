@@ -5,12 +5,14 @@
 Revere is a service communicating Terra's uptime and status to end-users
 (like a metaphorical [Paul Revere](https://en.wikipedia.org/wiki/Paul_Revere%27s_Midnight_Ride)).
 
-Revere accepts events as runtime input and translates those events to what communication channels expect:
-- Supported event sources:
-    - *[WIP: planned]* Automatic: Cloud Monitoring Alerts via Cloud Pub/Sub
-    - *[WIP: planned]* Manual: authenticated REST API
-- Supported communication platforms:
-    - *[WIP: in-development]* Statuspage.io
+Revere cares about **services** and **components**. A **service** is an internal application or codebase, something that we can directly monitor. A **component** is a piece of user-facing functionality, something that impacts customers and clients.
+
+Revere operates like this:
+1. Accept status information about **services** from event sources:
+   1. *[WIP: in-development]* Cloud Monitoring Alerts via Cloud Pub/Sub
+2. Translate those events to impacts on **components**
+3. Communicate those impacts to end-users:
+   1. *[WIP: in-development]* Statuspage.io
     
 ## Usage
 
