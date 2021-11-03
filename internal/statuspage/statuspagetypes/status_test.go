@@ -48,6 +48,52 @@ func TestStatus_ToString(t *testing.T) {
 	}
 }
 
+func TestStatus_ToSnakeCase(t *testing.T) {
+	tests := []struct {
+		name string
+		s    Status
+		want string
+	}{
+		{
+			name: "Operational output",
+			s:    Operational,
+			want: "operational",
+		},
+		{
+			name: "DegradedPerformance output",
+			s:    DegradedPerformance,
+			want: "degraded_performance",
+		},
+		{
+			name: "PartialOutage output",
+			s:    PartialOutage,
+			want: "partial_outage",
+		},
+		{
+			name: "MajorOutage output",
+			s:    MajorOutage,
+			want: "major_outage",
+		},
+		{
+			name: "UnderMaintenance output",
+			s:    UnderMaintenance,
+			want: "under_maintenance",
+		},
+		{
+			name: "Invalid status output",
+			s:    -1,
+			want: "invalid_status_-1",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.ToSnakeCase(); got != tt.want {
+				t.Errorf("ToSnakeCase() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestStatusFromKebabCase(t *testing.T) {
 	type args struct {
 		kebabCaseString string
@@ -99,6 +145,50 @@ func TestStatusFromKebabCase(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("StatusFromKebabCase() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStatus_WorstWith(t *testing.T) {
+	type args struct {
+		other Status
+	}
+	tests := []struct {
+		name string
+		s    Status
+		args args
+		want Status
+	}{
+		{
+			name: "Same",
+			s:    MajorOutage,
+			args: args{other: MajorOutage},
+			want: MajorOutage,
+		},
+		{
+			name: "Self worst",
+			s:    MajorOutage,
+			args: args{other: PartialOutage},
+			want: MajorOutage,
+		},
+		{
+			name: "Other worst",
+			s:    Operational,
+			args: args{other: DegradedPerformance},
+			want: DegradedPerformance,
+		},
+		{
+			name: "Maintenance takes precedence",
+			s:    UnderMaintenance,
+			args: args{other: MajorOutage},
+			want: UnderMaintenance,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.WorstWith(tt.args.other); got != tt.want {
+				t.Errorf("WorstWith() = %v, want %v", got, tt.want)
 			}
 		})
 	}

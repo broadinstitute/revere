@@ -253,3 +253,74 @@ func TestPostComponent(t *testing.T) {
 		})
 	}
 }
+
+func TestPatchComponentStatus(t *testing.T) {
+	type args struct {
+		client      *resty.Client
+		pageID      string
+		componentID string
+		newStatus   statuspagetypes.Status
+	}
+	config := testConfig()
+	baseComponent := statuspagemocks.ComponentFactory("to be edited")
+	baseComponent.PageID = config.Statuspage.PageID
+	baseComponent.Status = statuspagetypes.Operational.ToSnakeCase()
+	modifiedComponent := statuspagemocks.ComponentFactory("to be edited")
+	modifiedComponent.ID = baseComponent.ID
+	modifiedComponent.Status = statuspagetypes.MajorOutage.ToSnakeCase()
+	modifiedComponent.PageID = config.Statuspage.PageID
+	tests := []struct {
+		name    string
+		args    args
+		want    *statuspagetypes.Component
+		wantErr bool
+	}{
+		{
+			name: "Modifies the component if found",
+			args: args{
+				client:      Client(config),
+				pageID:      config.Statuspage.PageID,
+				componentID: baseComponent.ID,
+				newStatus:   statuspagetypes.MajorOutage,
+			},
+			want: modifiedComponent,
+		},
+		{
+			name: "Fails on page 404",
+			args: args{
+				client:      Client(config),
+				pageID:      "nonexistentID",
+				componentID: baseComponent.ID,
+				newStatus:   statuspagetypes.MajorOutage,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Fails on component 404",
+			args: args{
+				client:      Client(config),
+				pageID:      config.Statuspage.PageID,
+				componentID: "nonexistentID",
+				newStatus:   statuspagetypes.MajorOutage,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			httpmock.ActivateNonDefault(tt.args.client.GetClient())
+			statuspagemocks.ConfigureComponentMock(config, map[string]statuspagetypes.Component{baseComponent.ID: *baseComponent})
+			got, err := PatchComponentStatus(tt.args.client, tt.args.pageID, tt.args.componentID, tt.args.newStatus)
+			httpmock.DeactivateAndReset()
+			// test for function returning an error
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PatchComponent() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			// test for function mutating components
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("PatchComponent() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

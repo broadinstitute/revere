@@ -70,8 +70,10 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			existingComponent := components[httpmock.MustGetSubmatch(request, 2)]
 			// mimic Statuspage's more flexible json behavior as best we can
+			if incomingBody.Component.Name != "" {
+				existingComponent.Name = incomingBody.Component.Name
+			}
 			existingComponent.Description = incomingBody.Component.Description
-			existingComponent.Name = incomingBody.Component.Name
 			existingComponent.OnlyShowIfDegraded = incomingBody.Component.OnlyShowIfDegraded
 			existingComponent.Showcase = incomingBody.Component.Showcase
 			existingComponent.StartDate = incomingBody.Component.StartDate

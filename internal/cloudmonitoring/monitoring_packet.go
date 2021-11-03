@@ -54,3 +54,15 @@ type MonitoringMetric struct {
 	Type        string `json:"type"`
 	DisplayName string `json:"display_name"`
 }
+
+func (i *MonitoringIncident) HasEnded() bool {
+	switch i.State {
+	case "open":
+		return false
+	case "closed":
+		return true
+	}
+	// The incident state is theoretically an enum, but failing that we return based
+	// on the incident having a sensible ending time
+	return i.EndedAt > i.StartedAt
+}
