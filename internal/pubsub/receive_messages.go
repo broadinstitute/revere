@@ -7,14 +7,13 @@ import (
 	"fmt"
 	"github.com/broadinstitute/revere/internal/cloudmonitoring"
 	"github.com/broadinstitute/revere/internal/configuration"
+	"github.com/broadinstitute/revere/internal/pubsub/pubsubtypes"
 	"github.com/broadinstitute/revere/internal/shared"
 	"os"
 )
 
-type PerComponentHandler func(componentName string, labels *cloudmonitoring.AlertLabels, incident *cloudmonitoring.MonitoringIncident) error
-
 // receiveOnce should handle a single message; will run asynchronously
-func receiveOnce(config *configuration.Config, msg *pubsub.Message, callback PerComponentHandler) error {
+func receiveOnce(config *configuration.Config, msg *pubsub.Message, callback pubsubtypes.PerComponentHandler) error {
 	// parse Google's data structure
 	var packet *cloudmonitoring.MonitoringPacket
 	if err := json.Unmarshal(msg.Data, &packet); err != nil {
@@ -53,7 +52,7 @@ func receiveOnce(config *configuration.Config, msg *pubsub.Message, callback Per
 }
 
 // ReceiveMessages should never terminate, it continually pulls messages from the subscription
-func ReceiveMessages(config *configuration.Config, client *pubsub.Client, ctx context.Context, callback PerComponentHandler) error {
+func ReceiveMessages(config *configuration.Config, client *pubsub.Client, ctx context.Context, callback pubsubtypes.PerComponentHandler) error {
 	subscription := client.Subscription(config.Pubsub.SubscriptionID)
 	return subscription.Receive(ctx, func(cctx context.Context, msg *pubsub.Message) {
 		if err := receiveOnce(config, msg, callback); err != nil {

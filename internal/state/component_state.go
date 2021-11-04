@@ -5,6 +5,9 @@ import (
 	"sync"
 )
 
+// ComponentState records information about components that's derived during continuous operation.
+// Its fields shouldn't be operated on in parallel; it contains a sync.Mutex to help state.State
+// manage attempts at concurrent access.
 type ComponentState struct {
 	openIncidents map[string]statuspagetypes.Status
 	desiredStatus statuspagetypes.Status

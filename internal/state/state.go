@@ -6,6 +6,13 @@ import (
 	"sync"
 )
 
+// State contains information necessary for continuous operation that's derived throughout
+// the course of operation. Information not meeting that constraint should exist elsewhere
+// (like configuration.Config).
+// Right now, the only information meeting this criteria is per-component state.
+//
+// This object is responsible for making sure that concurrent users don't step on each
+// other.
 type State struct {
 	componentNameToState *sync.Map
 }

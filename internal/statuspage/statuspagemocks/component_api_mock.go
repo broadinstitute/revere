@@ -22,7 +22,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 		component.PageID = pageID
 		components[id] = component
 	}
-	httpmock.RegisterResponder("GET", fmt.Sprintf(`=~^%s/pages/(\w+)/components`, apiRoot),
+	httpmock.RegisterResponder("GET", fmt.Sprintf(`=~^%s/pages/([^/]+)/components`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
@@ -37,7 +37,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			return resp, nil
 		})
-	httpmock.RegisterResponder("POST", fmt.Sprintf(`=~^%s/pages/(\w+)/components`, apiRoot),
+	httpmock.RegisterResponder("POST", fmt.Sprintf(`=~^%s/pages/([^/]+)/components`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
@@ -56,7 +56,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			return resp, nil
 		})
-	httpmock.RegisterResponder("PATCH", fmt.Sprintf(`=~^%s/pages/(\w+)/components/(\w+)`, apiRoot),
+	httpmock.RegisterResponder("PATCH", fmt.Sprintf(`=~^%s/pages/([^/]+)/components/([^/]+)`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
@@ -87,7 +87,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			return resp, nil
 		})
-	httpmock.RegisterResponder("DELETE", fmt.Sprintf(`=~^%s/pages/(\w+)/components/(\w+)`, apiRoot),
+	httpmock.RegisterResponder("DELETE", fmt.Sprintf(`=~^%s/pages/([^/]+)/components/([^/]+)`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil

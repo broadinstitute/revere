@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/broadinstitute/revere/internal/api"
-	"github.com/broadinstitute/revere/internal/cloudmonitoring"
 	"github.com/broadinstitute/revere/internal/configuration"
 	"github.com/broadinstitute/revere/internal/pubsub"
 	"github.com/broadinstitute/revere/internal/pubsub/pubsubapi"
 	"github.com/broadinstitute/revere/internal/shared"
 	"github.com/broadinstitute/revere/internal/state"
+	"github.com/broadinstitute/revere/internal/statuspage"
 	"github.com/broadinstitute/revere/internal/statuspage/statuspageapi"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -70,22 +70,9 @@ func Serve(*cobra.Command, []string) {
 			runForever: func() {
 				shared.LogLn(config, "listening to pubsub...")
 				err := pubsub.ReceiveMessages(config, pubsubClient, pubsubCtx,
-					// A callback is used here rather than tightly coupling pubsub with statuspage and state
-					func(componentName string, labels *cloudmonitoring.AlertLabels, incident *cloudmonitoring.MonitoringIncident) error {
-						return appState.UseComponent(componentName, func(c *state.ComponentState) error {
-							var shouldEdit bool
-							if incident.HasEnded() {
-								shouldEdit = c.ResolveIncident(incident.IncidentID)
-							} else {
-								shouldEdit = c.LogIncident(incident.IncidentID, labels.AlertType)
-							}
-							if shouldEdit {
-								_, err := statuspageapi.PatchComponentStatus(statuspageClient, config.Statuspage.PageID, c.GetID(), c.GetDesiredStatus())
-								return err
-							}
-							return nil
-						})
-					})
+					// StatusUpdater returns a function to update the status for one component;
+					// ReceiveMessages will call that function as messages are handled
+					statuspage.StatusUpdater(config, appState, statuspageClient))
 				cobra.CheckErr(err)
 			},
 			uponShutdown: func() error {
