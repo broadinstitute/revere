@@ -37,6 +37,8 @@ func (s *State) Seed(componentNamesToIDs map[string]string) {
 // UseComponent runs a hook function with the state of some component. This function should
 // ensure that hooks never run simultaneously against the same component so long as callers
 // never copy the reference to the ComponentState object.
+//
+// For more explanation, see the usage of this function in statuspage.StatusUpdater()
 func (s *State) UseComponent(componentName string, hook func(c *ComponentState) error) error {
 	uncastedComponentState, found := s.componentNameToState.Load(componentName)
 	if !found {
