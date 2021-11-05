@@ -17,27 +17,26 @@ func receiveOnce(config *configuration.Config, msg *pubsub.Message, callback pub
 	// parse Google's data structure
 	var packet *cloudmonitoring.MonitoringPacket
 	if err := json.Unmarshal(msg.Data, &packet); err != nil {
-		shared.LogLn(config, "failed to parse packet", fmt.Sprintf("%+v", err))
-		return err
+		shared.LogLn(config, fmt.Sprintf("failed to parse packet, ignoring: %v", err))
+		return nil
 	}
 
 	// parse Revere's labels
 	labels, err := packet.ParseLabels()
 	if err != nil {
-		shared.LogLn(config, "failed to parse labels", fmt.Sprintf("%+v", err))
-		return err
+		shared.LogLn(config, fmt.Sprintf("failed to parse labels from %s packet, ignoring: %v", packet.Incident.PolicyName, err))
+		return nil
 	}
-	shared.LogLn(config,
-		fmt.Sprintf("pubsub alert %s from %s", packet.Incident.PolicyName, config.Pubsub.SubscriptionID),
-		fmt.Sprintf("	%+v", labels),
-		fmt.Sprintf("	AlertType %d corresponds to %s", labels.AlertType, labels.AlertType.ToString()),
-		fmt.Sprintf("	incident is reporting as closed: %v", packet.Incident.HasEnded()))
+	shared.LogLn(config, fmt.Sprintf("pubsub alert %s (closed: %v) -- parsed %+v (%s)",
+		packet.Incident.PolicyName, packet.Incident.HasEnded(), labels, labels.AlertType.ToString()))
 
 	// execute callback for each affected component
+	affectedSomeComponents := false
 	for _, serviceMapping := range config.ServiceToComponentMapping {
 		if serviceMapping.ServiceName == labels.ServiceName &&
 			serviceMapping.ServiceEnvironment == labels.ServiceEnvironment {
 			for _, componentName := range serviceMapping.AffectsComponentsNamed {
+				affectedSomeComponents = true
 				shared.LogLn(config,
 					fmt.Sprintf("pubsub alert %s affects %s, executing callback...", packet.Incident.IncidentID, componentName))
 				if err := callback(componentName, labels, packet.Incident); err != nil {
@@ -47,6 +46,9 @@ func receiveOnce(config *configuration.Config, msg *pubsub.Message, callback pub
 				}
 			}
 		}
+	}
+	if !affectedSomeComponents {
+		shared.LogLn(config, fmt.Sprintf("pubsub alert %s affected no components, ignoring", packet.Incident.PolicyName))
 	}
 	return nil
 }
