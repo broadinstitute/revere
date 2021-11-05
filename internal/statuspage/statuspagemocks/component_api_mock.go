@@ -22,7 +22,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 		component.PageID = pageID
 		components[id] = component
 	}
-	httpmock.RegisterResponder("GET", fmt.Sprintf(`=~^%s/pages/(\w+)/components`, apiRoot),
+	httpmock.RegisterResponder("GET", fmt.Sprintf(`=~^%s/pages/([^/]+)/components`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
@@ -37,7 +37,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			return resp, nil
 		})
-	httpmock.RegisterResponder("POST", fmt.Sprintf(`=~^%s/pages/(\w+)/components`, apiRoot),
+	httpmock.RegisterResponder("POST", fmt.Sprintf(`=~^%s/pages/([^/]+)/components`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
@@ -56,7 +56,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			return resp, nil
 		})
-	httpmock.RegisterResponder("PATCH", fmt.Sprintf(`=~^%s/pages/(\w+)/components/(\w+)`, apiRoot),
+	httpmock.RegisterResponder("PATCH", fmt.Sprintf(`=~^%s/pages/([^/]+)/components/([^/]+)`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil
@@ -70,8 +70,10 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			existingComponent := components[httpmock.MustGetSubmatch(request, 2)]
 			// mimic Statuspage's more flexible json behavior as best we can
+			if incomingBody.Component.Name != "" {
+				existingComponent.Name = incomingBody.Component.Name
+			}
 			existingComponent.Description = incomingBody.Component.Description
-			existingComponent.Name = incomingBody.Component.Name
 			existingComponent.OnlyShowIfDegraded = incomingBody.Component.OnlyShowIfDegraded
 			existingComponent.Showcase = incomingBody.Component.Showcase
 			existingComponent.StartDate = incomingBody.Component.StartDate
@@ -85,7 +87,7 @@ func ConfigureComponentMock(config *configuration.Config, components map[string]
 			}
 			return resp, nil
 		})
-	httpmock.RegisterResponder("DELETE", fmt.Sprintf(`=~^%s/pages/(\w+)/components/(\w+)`, apiRoot),
+	httpmock.RegisterResponder("DELETE", fmt.Sprintf(`=~^%s/pages/([^/]+)/components/([^/]+)`, apiRoot),
 		func(request *http.Request) (*http.Response, error) {
 			if pageNotFound := validatePageID(pageID, request); pageNotFound != nil {
 				return pageNotFound, nil

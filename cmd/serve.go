@@ -9,6 +9,9 @@ import (
 	"github.com/broadinstitute/revere/internal/pubsub"
 	"github.com/broadinstitute/revere/internal/pubsub/pubsubapi"
 	"github.com/broadinstitute/revere/internal/shared"
+	"github.com/broadinstitute/revere/internal/state"
+	"github.com/broadinstitute/revere/internal/statuspage"
+	"github.com/broadinstitute/revere/internal/statuspage/statuspageapi"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/sync/errgroup"
@@ -34,15 +37,31 @@ func Serve(*cobra.Command, []string) {
 	config, err := configuration.AssembleConfig(viper.GetViper())
 	cobra.CheckErr(err)
 
+	shared.LogLn(config, "preparing statuspage..")
+	statuspageClient := statuspageapi.Client(config)
+	statuspageComponents, err := statuspageapi.GetComponents(statuspageClient, config.Statuspage.PageID)
+	cobra.CheckErr(err)
+	componentNamesToIDs := make(map[string]string)
+	for _, component := range *statuspageComponents {
+		componentNamesToIDs[component.Name] = component.ID
+	}
+
+	shared.LogLn(config, "preparing pubsub...")
 	pubsubClient, err := pubsubapi.Client(config)
 	cobra.CheckErr(err)
 	pubsubCtx, cancelPubsub := context.WithCancel(context.Background())
 
+	shared.LogLn(config, "preparing api...")
 	apiServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Api.Port),
 		Handler: api.NewRouter(config),
 	}
 
+	shared.LogLn(config, "deriving state...")
+	appState := &state.State{}
+	appState.Seed(componentNamesToIDs)
+
+	// Routines to run in parallel
 	routines := []struct {
 		runForever   func()
 		uponShutdown func() error
@@ -50,7 +69,10 @@ func Serve(*cobra.Command, []string) {
 		{
 			runForever: func() {
 				shared.LogLn(config, "listening to pubsub...")
-				err := pubsub.ReceiveMessages(config, pubsubClient, pubsubCtx)
+				err := pubsub.ReceiveMessages(config, pubsubClient, pubsubCtx,
+					// StatusUpdater returns a function to update the status for one component;
+					// ReceiveMessages will call that function as messages are handled
+					statuspage.StatusUpdater(config, appState, statuspageClient))
 				cobra.CheckErr(err)
 			},
 			uponShutdown: func() error {

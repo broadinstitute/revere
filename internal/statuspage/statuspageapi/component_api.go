@@ -37,18 +37,6 @@ func PostComponent(client *resty.Client, pageID string, component statuspagetype
 	return resp.Result().(*statuspagetypes.Component), nil
 }
 
-// PatchComponent updates an existing component on the remote page by the component's ID, not name
-func PatchComponent(client *resty.Client, pageID string, componentID string, component statuspagetypes.Component) (*statuspagetypes.Component, error) {
-	resp, err := client.R().
-		SetResult(statuspagetypes.Component{}).
-		SetBody(map[string]interface{}{"component": component.ToRequest()}).
-		Patch(fmt.Sprintf("/pages/%s/components/%s", pageID, componentID))
-	if err = shared.CheckResponse(resp, err); err != nil {
-		return nil, err
-	}
-	return resp.Result().(*statuspagetypes.Component), nil
-}
-
 // DeleteComponent deletes an existing component on the remote page by the component's ID, not name
 func DeleteComponent(client *resty.Client, pageID string, componentID string) error {
 	resp, err := client.R().
@@ -57,4 +45,25 @@ func DeleteComponent(client *resty.Client, pageID string, componentID string) er
 		return err
 	}
 	return nil
+}
+
+// PatchComponent updates an existing component on the remote page by the component's ID, not name
+func PatchComponent(client *resty.Client, pageID string, componentID string, component statuspagetypes.Component) (*statuspagetypes.Component, error) {
+	return patchHelper(client, pageID, componentID, map[string]interface{}{"component": component.ToRequest()})
+}
+
+// PatchComponentStatus updates an existing component's status only
+func PatchComponentStatus(client *resty.Client, pageID string, componentID string, newStatus statuspagetypes.Status) (*statuspagetypes.Component, error) {
+	return patchHelper(client, pageID, componentID, map[string]interface{}{"component": map[string]string{"status": newStatus.ToSnakeCase()}})
+}
+
+func patchHelper(client *resty.Client, pageID string, componentID string, body map[string]interface{}) (*statuspagetypes.Component, error) {
+	resp, err := client.R().
+		SetResult(statuspagetypes.Component{}).
+		SetBody(body).
+		Patch(fmt.Sprintf("/pages/%s/components/%s", pageID, componentID))
+	if err = shared.CheckResponse(resp, err); err != nil {
+		return nil, err
+	}
+	return resp.Result().(*statuspagetypes.Component), nil
 }

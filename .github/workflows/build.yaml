@@ -75,3 +75,12 @@ jobs:
 
       - name: Push image
         run: "docker push ${{ steps.image-name.outputs.name }}"
+
+      - name: Comment pushed image
+        uses: actions/github-script@0.3.0
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
+            github.issues.createComment({ issue_number, owner, repo, body: 'Pushed image: ${{ steps.image-name.outputs.name }}' });
