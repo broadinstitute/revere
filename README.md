@@ -9,10 +9,10 @@ Revere cares about **services** and **components**. A **service** is an internal
 
 Revere operates like this:
 1. Accept status information about **services** from event sources:
-   1. *[WIP: in-development]* Cloud Monitoring Alerts via Cloud Pub/Sub
+   1. Cloud Monitoring Alerts via Cloud Pub/Sub
 2. Translate those events to impacts on **components**
 3. Communicate those impacts to end-users:
-   1. *[WIP: in-development]* Statuspage.io
+   1.  Statuspage.io
     
 ## Usage
 
@@ -43,8 +43,25 @@ The configuration file's format is defined by [`internal/config.go`](https://git
 .
 ├── cmd/
 │   └── # CLI commands
+├── docs/
+│   └── # Long-form documentation
 ├── internal/
-│   └── # Service operation [stub, more to be added here]
+│   ├── api/
+│   │   └── # Barebones API routes
+│   ├── cloudmonitoring/
+│   │   └── # Data types from Google Cloud Monitoring
+│   ├── configuration/
+│   │   └── # Data types for Revere's config file
+│   ├── pubsub/
+│   │   └── # Handling for Google Pub/Sub
+│   ├── shared/
+│   │   └── # Shared utility functions
+│   ├── state/
+│   │   └── # Data types for Revere's internal state
+│   ├── statuspage/
+│   │   └── # Data types and handling for Atlassian Statuspage
+│   └── version/
+│       └── # Run-time reference to Revere's own version
 └── main.go # CLI entrypoint
 ```
 
